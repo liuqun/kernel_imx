@@ -92,9 +92,9 @@
 #define MX6_ARM2_DISP0_I2C_EN		IMX_GPIO_NR(3, 28)
 #define MX6_ARM2_CAP_TCH_INT		IMX_GPIO_NR(3, 31)
 #define MX6_ARM2_DISP0_DET_INT		IMX_GPIO_NR(3, 31)
-#define MX6_ARM2_CSI0_RST		IMX_GPIO_NR(4, 5)
+#define MX6_ARM2_CSI0_RST		IMX_GPIO_NR(1, 17)//cym IMX_GPIO_NR(4, 5)
 #define MX6_ARM2_DISP0_RESET		IMX_GPIO_NR(5, 0)
-#define MX6_ARM2_CSI0_PWN		IMX_GPIO_NR(5, 23)
+#define MX6_ARM2_CSI0_PWN		IMX_GPIO_NR(1, 16)//cym IMX_GPIO_NR(5, 23)
 #define MX6_ARM2_CAN2_EN		IMX_GPIO_NR(5, 24)
 #define MX6_ARM2_CSI0_RST_TVIN		IMX_GPIO_NR(5, 25)
 #define MX6_ARM2_SD3_CD			IMX_GPIO_NR(6, 11)
@@ -551,8 +551,13 @@ static void mx6_csi0_io_init(void)
 	/* Camera power down */
 	gpio_request(MX6_ARM2_CSI0_PWN, "cam-pwdn");
 	gpio_direction_output(MX6_ARM2_CSI0_PWN, 1);
-	msleep(1);
+	msleep(20);
 	gpio_set_value(MX6_ARM2_CSI0_PWN, 0);
+	msleep(20);
+        gpio_set_value(MX6_ARM2_CSI0_RST, 0);
+        msleep(20);
+        gpio_set_value(MX6_ARM2_CSI0_RST, 1);
+        msleep(20);
 
 	/* For MX6Q:
 	 * GPR1 bit19 and bit20 meaning:
@@ -576,6 +581,8 @@ static void mx6_csi0_io_init(void)
 		mxc_iomux_set_gpr_register(13, 0, 3, 4);
 }
 
+/* remove by cym 20160707 */
+#if 0
 static struct fsl_mxc_camera_platform_data camera_data = {
 	.analog_regulator	= "DA9052_LDO7",
 	.core_regulator		= "DA9052_LDO9",
@@ -584,7 +591,22 @@ static struct fsl_mxc_camera_platform_data camera_data = {
 	.csi			= 0,
 	.io_init		= mx6_csi0_io_init,
 };
+#endif
+/* end remove */
 
+/* add by cym 201607070 */
+#ifdef CONFIG_MXC_CAMERA_OV5640
+static struct fsl_mxc_camera_platform_data camera_data_ov5640 =
+{
+        .mclk = 24000000,
+        .mclk_source = 0,
+        .csi = 0,
+        .io_init = mx6_csi0_io_init,
+};
+#endif
+/* end add */
+
+#ifdef CONFIG_MXC_TVIN_ADV7180
 static void mx6_csi0_tvin_io_init(void)
 {
 	if (0 == sgtl5000_en) {
@@ -624,6 +646,7 @@ static struct fsl_mxc_tvin_platform_data tvin_data = {
 	.io_init = mx6_csi0_tvin_io_init,
 	.cvbs = false,
 };
+#endif
 
 static void mx6_mipi_sensor_io_init(void)
 {
@@ -647,12 +670,14 @@ static void mx6_mipi_sensor_io_init(void)
 		mxc_iomux_set_gpr_register(13, 3, 3, 1);
 }
 
+#ifdef CONFIG_MXC_CAMERA_OV5640_MIPI
 static struct fsl_mxc_camera_platform_data ov5640_mipi_data = {
 	.mclk		= 24000000,
 	.csi		= 1,
 	.mclk_source = 0,
 	.io_init	= mx6_mipi_sensor_io_init,
 };
+#endif
 
 static struct mxc_audio_codec_platform_data cs42888_data = {
 	.rates = (SNDRV_PCM_RATE_44100 |
@@ -871,13 +896,20 @@ static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("cs42888", 0x48),
 		.platform_data = (void *)&cs42888_data,
-	}, {
+	},
+#ifdef CONFIG_MXC_CAMERA_OV5640
+	{
 		I2C_BOARD_INFO("ov5640", 0x3c),
-		.platform_data = (void *)&camera_data,
-	}, {
+		.platform_data = (void *)&camera_data_ov5640,
+	},
+#endif
+
+#ifdef CONFIG_MXC_TVIN_ADV7180
+	{
 		I2C_BOARD_INFO("adv7180", 0x21),
 		.platform_data = (void *)&tvin_data,
 	},
+#endif
 };
 
 static struct imxi2c_platform_data mx6_arm2_i2c_data = {
@@ -918,10 +950,14 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 		.irq = gpio_to_irq(MX6_ARM2_CAP_TCH_INT),
 	}, {
 		I2C_BOARD_INFO("mxc_hdmi_i2c", 0x50),
-	}, {
+	},
+#ifdef CONFIG_MXC_CAMERA_OV5640_MIPI
+	 {
 		I2C_BOARD_INFO("ov5640_mipi", 0x3c),
 		.platform_data = (void *)&ov5640_mipi_data,
-	}, {
+	}, 
+#endif
+	{
 		I2C_BOARD_INFO("sgtl5000", 0x0a),
 	},
 };

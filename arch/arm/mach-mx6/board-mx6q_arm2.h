@@ -229,9 +229,9 @@ static iomux_v3_cfg_t mx6q_arm2_csi0_sensor_pads[] = {
 	MX6Q_PAD_CSI0_MCLK__IPU1_CSI0_HSYNC,
 	MX6Q_PAD_CSI0_PIXCLK__IPU1_CSI0_PIXCLK,
 	/* camera reset */
-	MX6Q_PAD_GPIO_19__GPIO_4_5,
+	MX6Q_PAD_SD1_DAT1__GPIO_1_17,//cym MX6Q_PAD_GPIO_19__GPIO_4_5,
 	/* camera powerdown */
-	MX6Q_PAD_CSI0_DAT5__GPIO_5_23,
+	MX6Q_PAD_SD1_DAT0__GPIO_1_16,//MX6Q_PAD_CSI0_DAT5__GPIO_5_23,
 };
 
 static iomux_v3_cfg_t mx6q_arm2_csi0_tvin_pads[] = {

@@ -846,16 +846,6 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("mxc_hdmi_i2c", 0x50),
 	},
-#if 0
-	{
-		I2C_BOARD_INFO("ov5640_mipi", 0x3c),
-		.platform_data = (void *)&mipi_csi2_data,
-	},
-	{
-		I2C_BOARD_INFO("egalax_ts", 0x4),
-                .irq = gpio_to_irq(TOPEET_CAP_TCH_INT0),
-	},
-#endif
        //it is important that max11801 on touch KCONFIG and here,otherwise android can boot success,why? add by dg 2015-08-31
 	{
 		I2C_BOARD_INFO("max11801", 0x48),
