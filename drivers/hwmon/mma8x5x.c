@@ -566,7 +566,7 @@ static ssize_t mma8x5x_fifo_store(struct device *dev,
 	struct i2c_client * client = pdata->client;
 	int period,timeout,wakeup;
 	sscanf(buf,"%d,%d,%d",&period,&timeout,&wakeup);
-	printk("period %d ,timeout is %d, wake up is :%d\n",period,timeout,wakeup);
+	//printk("period %d ,timeout is %d, wake up is :%d\n",period,timeout,wakeup);
 	if(timeout > 0){
 		mutex_lock(&pdata->data_lock);
 		cancel_delayed_work_sync(&pdata->work);
