@@ -1035,6 +1035,10 @@ rollback:
 	return err;
 }
 
+/* add by cym 20160708 for MT6620 */
+EXPORT_SYMBOL(dev_change_name);
+/* end add */
+
 /**
  *	dev_set_alias - change ifalias of a device
  *	@dev: device

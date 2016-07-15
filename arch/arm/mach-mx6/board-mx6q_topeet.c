@@ -202,6 +202,16 @@
 #define TOPEET_ELAN_RST	IMX_GPIO_NR(3, 8)
 #define TOPEET_ELAN_INT	IMX_GPIO_NR(3, 28)
 
+/* add by cym 20160712 */
+#define CFG_IO_MT6620_CD_PIN		IMX_GPIO_NR(2, 0)//IMX_GPIO_NR(3, 2)
+#define CFG_IO_MT6620_TRIGGER_PIN	IMX_GPIO_NR(3, 2)//IMX_GPIO_NR(2, 0)
+#define CFG_IO_MT6620_POWER_PIN		IMX_GPIO_NR(6, 18)
+#define CFG_IO_MT6620_SYSRST_PIN	IMX_GPIO_NR(6, 17)
+#define CFG_IO_MT6620_BGF_INT_PIN	IMX_GPIO_NR(3, 8)
+#define CFG_IO_MT6620_WIFI_INT_PIN	IMX_GPIO_NR(3, 10)
+
+/* end add */
+
 #define MX6_ENET_IRQ		IMX_GPIO_NR(1, 6)
 #define IOMUX_OBSRV_MUX1_OFFSET	0x3c
 #define OBSRV_MUX1_MASK			0x3f
@@ -237,9 +247,9 @@ static const struct esdhc_platform_data mx6q_topeet_sd3_data __initconst = {
         .cd_gpio = TOPEET_SD3_CD,
         .wp_gpio = TOPEET_SD3_WP,
 	.keep_power_at_suspend = 1,
-	.support_8bit = 1,
+	.support_8bit = 0,//1,
 	.delay_line = 0,
-	.cd_type = ESDHC_CD_CONTROLLER,
+	.cd_type = ESDHC_CD_GPIO,//ESDHC_CD_CONTROLLER,
 	.runtime_pm = 1,
 };
 
@@ -264,8 +274,11 @@ static const struct imxuart_platform_data mx6q_sd_uart5_data __initconst = {
 
 static inline void mx6q_topeet_init_uart(void)
 {
-	imx6q_add_imx_uart(2, NULL);
 	imx6q_add_imx_uart(0, NULL);
+
+	imx6q_add_imx_uart(1, NULL);
+
+	imx6q_add_imx_uart(2, NULL);
 }
 
 static int mx6q_topeet_fec_phy_init(struct phy_device *phydev)
@@ -1907,6 +1920,156 @@ static void __init uart5_init(void)
 	imx6q_add_imx_uart(4, &mx6q_sd_uart5_data);
 }
 
+/* add by cym 20160708 */
+#if defined(CONFIG_MTK_COMBO_MT66XX)
+#include <linux/combo_mt66xx.h>
+
+void setup_mt6620_wlan_power_for_onoff(int on)
+{
+
+    int chip_pwd_low_val;
+    int outValue;
+
+    printk("[mt6620] +++ %s : wlan power %s\n",__func__, on?"on":"off");
+#if 1
+	gpio_request(CFG_IO_MT6620_CD_PIN, "CFG_IO_MT6620_CD_PIN");
+	gpio_direction_input(CFG_IO_MT6620_CD_PIN);
+    int value_before = gpio_get_value(CFG_IO_MT6620_CD_PIN);
+    printk("[mt6620] --- %s---CFG_IO_MT6620_CD_PIN  first is %d\n",__func__,value_before);
+    msleep(100);
+
+    if (on) {
+        outValue = 0;
+    } else {
+        outValue = 1;
+    }
+	gpio_request(CFG_IO_MT6620_TRIGGER_PIN, "CFG_IO_MT6620_TRIGGER_PIN");
+	gpio_direction_output(CFG_IO_MT6620_TRIGGER_PIN, outValue);
+
+    msleep(100);
+
+
+
+   int value = gpio_get_value(CFG_IO_MT6620_CD_PIN);
+   // int value = nxp_soc_gpio_get_in_value(CFG_SDMMC0_DETECT_IO);
+
+	gpio_free(CFG_IO_MT6620_CD_PIN);
+	gpio_free(CFG_IO_MT6620_TRIGGER_PIN);
+
+    printk("[mt6620] --- %s---CFG_IO_MT6620_CD_PIN  second is %d\n",__func__,value);
+#endif
+    printk("[mt6620] --- %s\n",__func__);
+
+}
+EXPORT_SYMBOL(setup_mt6620_wlan_power_for_onoff);
+
+static struct mtk_wmt_platform_data mtk_wmt_pdata = {
+#if 1
+    .pmu = CFG_IO_MT6620_POWER_PIN,  //EXYNOS4_GPC1(0), //RK30SDK_WIFI_GPIO_POWER_N,//RK30_PIN0_PB5, //MUST set to pin num in target system
+    .rst =  CFG_IO_MT6620_SYSRST_PIN, //EXYNOS4_GPC1(1),//RK30SDK_WIFI_GPIO_RESET_N,//RK30_PIN3_PD0, //MUST set to pin num in target system
+    .bgf_int = CFG_IO_MT6620_BGF_INT_PIN, // EXYNOS4_GPX2(4), //IRQ_EINT(20),//RK30SDK_WIFI_GPIO_BGF_INT_B,//RK30_PIN0_PA5,//MUST set to pin num in target system if use UART interface.
+#endif
+    .urt_cts = -EINVAL, // set it to the correct GPIO num if use common SDIO, otherwise set it to -EINVAL.
+    .rtc = -EINVAL, //Optipnal. refer to HW design.
+    .gps_sync = -EINVAL, //Optional. refer to HW design.
+    .gps_lna = -EINVAL, //Optional. refer to HW design.
+};
+static struct mtk_sdio_eint_platform_data mtk_sdio_eint_pdata = {
+   // .sdio_eint = EXYNOS4_GPX2(5),//IRQ_EINT(21) ,//RK30SDK_WIFI_GPIO_WIFI_INT_B,//53, //MUST set pin num in target system.
+     .sdio_eint = CFG_IO_MT6620_WIFI_INT_PIN,
+};
+static struct platform_device mtk_wmt_dev = {
+    .name = "mtk_wmt",
+    .id = 1,
+    .dev = {
+
+
+        .platform_data = &mtk_wmt_pdata,
+    },
+};
+static struct platform_device mtk_sdio_eint_dev = {
+    .name = "mtk_sdio_eint",
+    .id = 1,
+    .dev = {
+        .platform_data = &mtk_sdio_eint_pdata,
+    },
+};
+static void __init mtk_combo_init(void)
+{
+
+    unsigned int power_io = CFG_IO_MT6620_POWER_PIN;//CFG_IO_MT6620_POWER_ENABLE;
+    unsigned int reset_io = CFG_IO_MT6620_SYSRST_PIN;//CFG_IO_MT6620_SYSRST;
+    unsigned int wifi_interrupt_io = CFG_IO_MT6620_WIFI_INT_PIN;//CFG_IO_MT6620_WIFI_INT;
+    unsigned int bga_interrupt_io  =  CFG_IO_MT6620_BGF_INT_PIN;//CFG_IO_MT6620_BGF_INT;
+    unsigned int carddetect_io = CFG_IO_MT6620_CD_PIN;//CFG_IO_MT6620_CD;
+    unsigned int trigger_io = CFG_IO_MT6620_TRIGGER_PIN;//CFG_IO_MT6620_TRIGGER;
+
+
+    /* Power Enable  signal init*/
+	gpio_request(power_io, "power_io");
+	gpio_direction_output(power_io, 0);
+	gpio_free(power_io);
+    //gpio_set_value(power_io, 0);
+    //nxp_soc_gpio_set_io_dir(power_io, 1);
+    //nxp_soc_gpio_set_io_func(power_io, nxp_soc_gpio_get_altnum(power_io));
+
+
+
+    /* SYSRST  signal init*/
+	gpio_request(reset_io, "reset_io");
+        gpio_direction_output(reset_io, 0);
+        gpio_free(reset_io);
+    //gpio_set_value(reset_io, 0);
+    //nxp_soc_gpio_set_io_dir(reset_io, 1);
+    //nxp_soc_gpio_set_io_func(reset_io, nxp_soc_gpio_get_altnum(reset_io));
+
+
+    mdelay(5);
+
+#if 1
+    //need config eint models for Wifi & BGA Interrupt
+	gpio_request(wifi_interrupt_io, "wifi_interrupt_io");
+	gpio_direction_input(wifi_interrupt_io);
+	gpio_free(wifi_interrupt_io);
+    //nxp_soc_gpio_set_io_dir(wifi_interrupt_io, 0);
+    //nxp_soc_gpio_set_io_func(wifi_interrupt_io, nxp_soc_gpio_get_altnum(wifi_interrupt_io));
+
+
+	gpio_request(bga_interrupt_io, "bga_interrupt_io");
+	gpio_direction_input(bga_interrupt_io);
+	gpio_free(bga_interrupt_io);
+    //nxp_soc_gpio_set_io_dir(bga_interrupt_io, 0);
+    //nxp_soc_gpio_set_io_func(bga_interrupt_io, nxp_soc_gpio_get_altnum(bga_interrupt_io));
+#endif
+
+    //init trigger pin and cd detect pin
+	gpio_request(trigger_io, "trigger_io");
+	gpio_direction_output(trigger_io, 1);
+	gpio_free(trigger_io);
+    //nxp_soc_gpio_set_out_value(trigger_io, 1);
+    //nxp_soc_gpio_set_io_dir(trigger_io, 1);
+    //nxp_soc_gpio_set_io_func(trigger_io, nxp_soc_gpio_get_altnum(trigger_io));
+
+	gpio_request(carddetect_io, "carddetect_io");
+	gpio_direction_input(carddetect_io);
+	gpio_free(carddetect_io);
+    //nxp_soc_gpio_set_io_dir(carddetect_io, 0);
+    //nxp_soc_gpio_set_io_func(carddetect_io, nxp_soc_gpio_get_altnum(carddetect_io));
+
+    return;
+}
+
+static int  itop4418_wifi_combo_module_gpio_init(void)
+{
+
+    mtk_combo_init();
+    platform_device_register(&mtk_wmt_dev);
+    platform_device_register(&mtk_sdio_eint_dev);
+}
+
+#endif
+/* end add */
+
 /*!
  * Board specific initialization.
  */
@@ -2219,6 +2382,12 @@ static void __init mx6_topeet_board_init(void)
 	imx6q_add_perfmon(0);
 	imx6q_add_perfmon(1);
 	imx6q_add_perfmon(2);
+
+/* add by cym 20160712 */
+#if defined(CONFIG_MTK_COMBO_MT66XX)
+        itop4418_wifi_combo_module_gpio_init();
+#endif
+/* end add */
 }
 
 extern void __iomem *twd_base;

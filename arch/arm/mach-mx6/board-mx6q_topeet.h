@@ -180,6 +180,11 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_CSI0_DAT10__UART1_TXD,
 	MX6Q_PAD_CSI0_DAT11__UART1_RXD,
 
+	/* UART2 for BlueTooth, add by cym 20160712 */
+	MX6Q_PAD_EIM_D26__UART2_TXD,
+	MX6Q_PAD_EIM_D27__UART2_RXD,
+	/* end add */
+
 	/* UART3 for gps */
 	MX6Q_PAD_EIM_D24__UART3_TXD,
 	MX6Q_PAD_EIM_D25__UART3_RXD,
@@ -218,8 +223,8 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_SD3_DAT3__USDHC3_DAT3_50MHZ,
 	MX6Q_PAD_SD3_DAT4__USDHC3_DAT4_50MHZ,
 	MX6Q_PAD_SD3_DAT5__USDHC3_DAT5_50MHZ,
-	MX6Q_PAD_SD3_DAT6__USDHC3_DAT6_50MHZ,
-	MX6Q_PAD_SD3_DAT7__USDHC3_DAT7_50MHZ,
+	//MX6Q_PAD_SD3_DAT6__USDHC3_DAT6_50MHZ,
+	//MX6Q_PAD_SD3_DAT7__USDHC3_DAT7_50MHZ,
 	MX6Q_PAD_NANDF_D0__GPIO_2_0,		/* SD3_CD */
 	MX6Q_PAD_NANDF_D1__GPIO_2_1,		/* SD3_WP */
 
@@ -266,6 +271,11 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_NANDF_CS2__GPIO_6_15,
 	/* CABC_EN1 */
 	MX6Q_PAD_NANDF_CS3__GPIO_6_16,
+
+	/* add by cym 20160712 */
+	MX6Q_PAD_SD3_DAT6__GPIO_6_18,
+	MX6Q_PAD_SD3_DAT7__GPIO_6_17
+	/* end add */
 };
 
 static iomux_v3_cfg_t mx6q_topeet_csi0_sensor_pads[] = {
