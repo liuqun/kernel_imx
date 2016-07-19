@@ -103,8 +103,8 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_EIM_DA15__GPIO_3_15,	/* J12 - Boot Mode Select */
 
 	/* SW4 , SW5 & SW1 */
-	MX6Q_PAD_GPIO_4__GPIO_1_4,	/* Volume Up */
-	MX6Q_PAD_GPIO_5__GPIO_1_5,	/* Volume Down */
+	MX6Q_PAD_GPIO_9__GPIO_1_9,	/* Volume Up */
+	MX6Q_PAD_GPIO_18__GPIO_7_13,	/* Volume Down */
 	MX6Q_PAD_EIM_D29__GPIO_3_29,	/* power off */
 
 	/* CAP_TCH_INT1 */
@@ -274,7 +274,9 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 
 	/* add by cym 20160712 */
 	MX6Q_PAD_SD3_DAT6__GPIO_6_18,
-	MX6Q_PAD_SD3_DAT7__GPIO_6_17
+	MX6Q_PAD_SD3_DAT7__GPIO_6_17,
+
+	MX6Q_PAD_GPIO_4__GPIO_1_4,
 	/* end add */
 };
 

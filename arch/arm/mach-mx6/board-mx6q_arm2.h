@@ -84,7 +84,7 @@ static iomux_v3_cfg_t mx6q_arm2_pads[] = {
 	//MX6Q_PAD_SD3_DAT7__USDHC3_DAT7_50MHZ,
 	MX6Q_PAD_SD3_RST__USDHC3_RST,
 	/* SD3 VSelect */
-	MX6Q_PAD_GPIO_18__USDHC3_VSELECT,
+	//cym MX6Q_PAD_GPIO_18__USDHC3_VSELECT,
 	/* SD3_CD and SD3_WP */
 	MX6Q_PAD_NANDF_CS0__GPIO_6_11,
 	MX6Q_PAD_NANDF_CS1__GPIO_6_14,
@@ -168,7 +168,7 @@ static iomux_v3_cfg_t mx6q_arm2_pads[] = {
 	MX6Q_PAD_EIM_D29__UART2_CTS,
 #endif
 	/* PWM1 */
-	MX6Q_PAD_GPIO_9__PWM1_PWMO,
+	//cym MX6Q_PAD_GPIO_9__PWM1_PWMO,
 
 	/* DISP0 DET */
 	MX6Q_PAD_EIM_D31__GPIO_3_31,

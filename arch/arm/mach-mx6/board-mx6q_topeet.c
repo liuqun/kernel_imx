@@ -89,8 +89,8 @@
 #define TOPEET_USR_DEF_GRN_LED	IMX_GPIO_NR(1, 1)
 #define TOPEET_BT_RESET	IMX_GPIO_NR(1, 2)
 #define TOPEET_USR_DEF_RED_LED	IMX_GPIO_NR(1, 2)
-#define TOPEET_VOLUME_UP	IMX_GPIO_NR(1, 4)
-#define TOPEET_VOLUME_DN	IMX_GPIO_NR(1, 5)
+#define TOPEET_VOLUME_UP	IMX_GPIO_NR(1, 9)
+#define TOPEET_VOLUME_DN	IMX_GPIO_NR(7, 13)
 #define TOPEET_MICROPHONE_DET	IMX_GPIO_NR(1, 9)
 #define TOPEET_CSI0_PWN	IMX_GPIO_NR(1, 16)
 #define TOPEET_CSI0_RST	IMX_GPIO_NR(1, 17)
@@ -105,7 +105,7 @@
 
 #define TOPEET_SD3_CD		IMX_GPIO_NR(2, 0)
 #define TOPEET_SD3_WP		IMX_GPIO_NR(2, 1)
-#define TOPEET_SD2_CD		IMX_GPIO_NR(2, 2)
+#define TOPEET_SD2_CD		IMX_GPIO_NR(1, 4)//cym IMX_GPIO_NR(2, 2)
 #define TOPEET_SD2_WP		IMX_GPIO_NR(2, 3)
 #define TOPEET_CHARGE_DOK_B	IMX_GPIO_NR(2, 24)
 #define TOPEET_GPS_RESET	IMX_GPIO_NR(2, 28)
@@ -235,9 +235,9 @@ static int max17135_regulator_init(struct max17135 *max17135);
 
 static const struct esdhc_platform_data mx6q_topeet_sd2_data __initconst = {
         .cd_gpio = TOPEET_SD2_CD,
-        .wp_gpio = TOPEET_SD2_WP,
+        //cym .wp_gpio = TOPEET_SD2_WP,
 	.keep_power_at_suspend = 1,
-	.support_8bit = 1,
+	//cym .support_8bit = 1,
 	.delay_line = 0,
 	.cd_type = ESDHC_CD_CONTROLLER,
 	.runtime_pm = 1,
