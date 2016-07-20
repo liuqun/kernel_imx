@@ -66,7 +66,12 @@ snd-soc-wm8904-objs := wm8904.o
 snd-soc-wm8915-objs := wm8915.o
 snd-soc-wm8940-objs := wm8940.o
 snd-soc-wm8955-objs := wm8955.o
+#snd-soc-wm8960-objs := wm8960.o
+ifneq ($(wildcard sound/soc/codecs/wm8960.c),)
 snd-soc-wm8960-objs := wm8960.o
+else
+snd-soc-wm8960-objs := wm8960.module
+endif
 snd-soc-wm8961-objs := wm8961.o
 snd-soc-wm8962-objs := wm8962.o
 snd-soc-wm8971-objs := wm8971.o

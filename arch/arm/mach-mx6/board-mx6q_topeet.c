@@ -55,7 +55,12 @@
 #include <linux/mfd/max17135.h>
 #include <linux/mfd/wm8994/pdata.h>
 #include <linux/mfd/wm8994/gpio.h>
+#ifdef CONFIG_SND_SOC_WM8962
 #include <sound/wm8962.h>
+#endif
+#ifdef CONFIG_SND_SOC_WM8960
+#include <sound/wm8960.h>
+#endif
 #include <linux/mfd/mxc-hdmi-core.h>
 
 #include <mach/common.h>
@@ -148,7 +153,7 @@
 #define TOPEET_AUX_5V_EN	IMX_GPIO_NR(6, 10)
 #define TOPEET_DI1_D0_CS	IMX_GPIO_NR(6, 31)
 
-#define TOPEET_HEADPHONE_DET	IMX_GPIO_NR(7, 8)
+#define TOPEET_HEADPHONE_DET	IMX_GPIO_NR(3, 31)//cym IMX_GPIO_NR(7, 8)
 #define TOPEET_PCIE_RST_B_REVB	IMX_GPIO_NR(7, 12)
 #define TOPEET_PMIC_INT_B	IMX_GPIO_NR(7, 13)
 #define TOPEET_PFUZE_INT	IMX_GPIO_NR(7, 13)
@@ -431,6 +436,103 @@ static int mxc_wm8958_init(void)
 	return 0;
 }
 
+#ifdef CONFIG_SND_SOC_WM8960
+static struct platform_device mx6_topeet_audio_wm8960_device =
+{
+        .name = "imx-wm8960",
+};
+
+static struct mxc_audio_platform_data wm8960_data;
+
+static int wm8960_clk_enable(int enable)
+{
+        if (enable)
+                clk_enable(clko);
+        else
+                clk_disable(clko);
+
+        return 0;
+}
+
+static int mxc_wm8960_init(void)
+{
+        int rate;
+
+        clko = clk_get(NULL, "clko_clk");
+        if (IS_ERR(clko))
+        {
+                pr_err("can't get CLKO clock.\n");
+                return PTR_ERR(clko);
+        }
+        /* both audio codec and comera use CLKO clk*/
+        rate = clk_round_rate(clko, 24000000);
+        clk_set_rate(clko, rate);
+
+        wm8960_data.sysclk = rate;
+
+        return 0;
+}
+
+static struct wm8960_data wm8960_config_data =
+{
+        .gpio_init = {
+                [2] = WM8960_GPIO_FN_DMICCLK,
+                [4] = 0x8000 | WM8960_GPIO_FN_DMICDAT,
+        },
+};
+
+static struct mxc_audio_platform_data wm8960_data =
+{
+        .ssi_num = 1,
+        .src_port = 2,
+        .ext_port = 3,
+        .hp_gpio = TOPEET_HEADPHONE_DET,
+        .hp_active_low = 1,
+        .mic_gpio = TOPEET_MICROPHONE_DET,
+        .mic_active_low = 1,
+        .init = mxc_wm8960_init,
+        .clock_enable = wm8960_clk_enable,
+};
+
+static struct regulator_consumer_supply topeet_vwm8960_consumers[] =
+{
+        REGULATOR_SUPPLY("SPKVDD1", "1-001a"),
+        REGULATOR_SUPPLY("SPKVDD2", "1-001a"),
+};
+
+static struct regulator_init_data topeet_vwm8960_init =
+{
+        .constraints = {
+                .name = "SPKVDD",
+                .valid_ops_mask =  REGULATOR_CHANGE_STATUS,
+                .boot_on = 1,
+        },
+        .num_consumer_supplies = ARRAY_SIZE(topeet_vwm8960_consumers),
+        .consumer_supplies = topeet_vwm8960_consumers,
+};
+
+static struct fixed_voltage_config topeet_vwm8960_reg_config =
+{
+        .supply_name    = "SPKVDD",
+        .microvolts     = 4200000,
+        .gpio           = TOPEET_CODEC_PWR_EN,
+        .enable_high    = 1,
+        .enabled_at_boot = 1,
+        .init_data      = &topeet_vwm8960_init,
+};
+
+static struct platform_device topeet_vwm8960_reg_devices =
+{
+        .name   = "reg-fixed-voltage",
+        .id     = 4,
+        .dev    = {
+                .platform_data = &topeet_vwm8960_reg_config,
+        },
+};
+
+#endif
+
+#ifdef CONFIG_SND_SOC_WM8962
 static struct platform_device mx6_topeet_audio_wm8962_device = {
 	.name = "imx-wm8962",
 };
@@ -516,6 +618,7 @@ static struct platform_device topeet_vwm8962_reg_devices = {
                 .platform_data = &topeet_vwm8962_reg_config,
 	},
 };
+#endif
 
 static void mx6q_csi0_cam_powerdown(int powerdown)
 {
@@ -865,6 +968,12 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 		.platform_data = (void *)&max11801_mode,
                 .irq = gpio_to_irq(TOPEET_TS_INT),
 	},
+#ifdef CONFIG_SND_SOC_WM8960
+	{
+                I2C_BOARD_INFO("wm8960", 0x1a),
+                .platform_data = (void *) &wm8960_config_data,
+        },
+#endif
 
 };
 
@@ -1582,12 +1691,23 @@ static int __init imx6q_init_audio(void)
 
 		mxc_wm8958_init();
 	} else {
+#ifdef CONFIG_SND_SOC_WM8962
                 platform_device_register(&topeet_vwm8962_reg_devices);
                 mxc_register_device(&mx6_topeet_audio_wm8962_device,
 				    &wm8962_data);
                 imx6q_add_imx_ssi(1, &mx6_topeet_ssi_pdata);
 
 		mxc_wm8962_init();
+#endif
+
+#ifdef CONFIG_SND_SOC_WM8960
+		platform_device_register(&topeet_vwm8960_reg_devices);
+        	mxc_register_device(&mx6_topeet_audio_wm8960_device,
+                	            &wm8960_data);
+        	imx6q_add_imx_ssi(1, &mx6_topeet_ssi_pdata);
+
+        	mxc_wm8960_init();
+#endif
 	}
 
 	return 0;
@@ -2182,8 +2302,10 @@ static void __init mx6_topeet_board_init(void)
 		strcpy(mxc_i2c0_board_info[0].type, "wm8958");
 		mxc_i2c0_board_info[0].platform_data = &wm8958_config_data;
 	} else {
+#ifdef CONFIG_SND_SOC_WM8962
 		strcpy(mxc_i2c0_board_info[0].type, "wm8962");
 		mxc_i2c0_board_info[0].platform_data = &wm8962_config_data;
+#endif
 	}
 	imx6q_add_device_gpio_leds();
 

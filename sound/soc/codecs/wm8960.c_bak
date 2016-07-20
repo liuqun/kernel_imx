@@ -1009,6 +1009,8 @@ static __devinit int wm8960_i2c_probe(struct i2c_client *i2c,
 	struct wm8960_priv *wm8960;
 	int ret;
 
+	printk("**********************fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+
 	wm8960 = kzalloc(sizeof(struct wm8960_priv), GFP_KERNEL);
 	if (wm8960 == NULL)
 		return -ENOMEM;
@@ -1021,6 +1023,7 @@ static __devinit int wm8960_i2c_probe(struct i2c_client *i2c,
 			&soc_codec_dev_wm8960, &wm8960_dai, 1);
 	if (ret < 0)
 		kfree(wm8960);
+	printk("**********************fun:%s, line = %d\n", __FUNCTION__, __LINE__);
 	return ret;
 }
 
@@ -1052,6 +1055,7 @@ static int __init wm8960_modinit(void)
 {
 	int ret = 0;
 #if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
+	printk("**********************fun:%s, line = %d\n", __FUNCTION__, __LINE__);
 	ret = i2c_add_driver(&wm8960_i2c_driver);
 	if (ret != 0) {
 		printk(KERN_ERR "Failed to register WM8960 I2C driver: %d\n",
