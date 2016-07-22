@@ -84,7 +84,7 @@
 #include "board-mx6dl_arm2.h"
 
 /* GPIO PIN, sort by PORT/BIT */
-#define MX6_ARM2_LDB_BACKLIGHT		IMX_GPIO_NR(1, 9)
+//cym #define MX6_ARM2_LDB_BACKLIGHT		IMX_GPIO_NR(1, 9)
 #define MX6_ARM2_ECSPI1_CS0		IMX_GPIO_NR(2, 30)
 #define MX6_ARM2_ECSPI1_CS1		IMX_GPIO_NR(3, 19)
 #define MX6_ARM2_USB_OTG_PWR		IMX_GPIO_NR(3, 22)
@@ -100,7 +100,7 @@
 #define MX6_ARM2_SD3_CD			IMX_GPIO_NR(6, 11)
 #define MX6_ARM2_SD3_WP			IMX_GPIO_NR(6, 14)
 #define MX6_ARM2_CAN1_STBY		IMX_GPIO_NR(7, 12)
-#define MX6_ARM2_CAN1_EN		IMX_GPIO_NR(7, 13)
+#define MX6_ARM2_CAN1_EN		IMX_GPIO_NR(4, 5)//cym IMX_GPIO_NR(7, 13)
 #define MX6_ARM2_MAX7310_1_BASE_ADDR	IMX_GPIO_NR(8, 0)
 #define MX6_ARM2_MAX7310_2_BASE_ADDR	IMX_GPIO_NR(8, 8)
 #define MX6DL_ARM2_EPDC_SDDO_0		IMX_GPIO_NR(2, 22)
@@ -2309,8 +2309,8 @@ static void __init mx6_arm2_init(void)
 	gpio_request(MX6_ARM2_DISP0_PWR, "disp0-pwr");
 	gpio_direction_output(MX6_ARM2_DISP0_PWR, 1);
 
-	gpio_request(MX6_ARM2_LDB_BACKLIGHT, "ldb-backlight");
-	gpio_direction_output(MX6_ARM2_LDB_BACKLIGHT, 1);
+	//cym gpio_request(MX6_ARM2_LDB_BACKLIGHT, "ldb-backlight");
+	//cym gpio_direction_output(MX6_ARM2_LDB_BACKLIGHT, 1);
 	imx6q_add_otp();
 	imx6q_add_viim();
 	imx6q_add_imx2_wdt(0, NULL);

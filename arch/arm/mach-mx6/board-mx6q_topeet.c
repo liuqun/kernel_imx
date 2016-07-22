@@ -96,7 +96,7 @@
 #define TOPEET_USR_DEF_RED_LED	IMX_GPIO_NR(1, 2)
 #define TOPEET_VOLUME_UP	IMX_GPIO_NR(1, 9)
 #define TOPEET_VOLUME_DN	IMX_GPIO_NR(7, 13)
-#define TOPEET_MICROPHONE_DET	IMX_GPIO_NR(1, 9)
+#define TOPEET_MICROPHONE_DET	IMX_GPIO_NR(3, 31)
 #define TOPEET_CSI0_PWN	IMX_GPIO_NR(1, 16)
 #define TOPEET_CSI0_RST	IMX_GPIO_NR(1, 17)
 #define TOPEET_ACCL_INT	IMX_GPIO_NR(1, 18)
@@ -155,8 +155,10 @@
 
 #define TOPEET_HEADPHONE_DET	IMX_GPIO_NR(3, 31)//cym IMX_GPIO_NR(7, 8)
 #define TOPEET_PCIE_RST_B_REVB	IMX_GPIO_NR(7, 12)
+#if 0	//remove by cym 
 #define TOPEET_PMIC_INT_B	IMX_GPIO_NR(7, 13)
 #define TOPEET_PFUZE_INT	IMX_GPIO_NR(7, 13)
+#endif/
 
 #define TOPEET_EPDC_SDDO_0	IMX_GPIO_NR(2, 22)
 #define TOPEET_EPDC_SDDO_1	IMX_GPIO_NR(3, 10)
@@ -1806,7 +1808,7 @@ static struct gpio_keys_platform_data topeet_button_data = {
 static struct gpio_keys_button new_topeet_buttons[] = {
         GPIO_BUTTON(TOPEET_VOLUME_UP, KEY_VOLUMEUP, 1, "volume-up", 0, 1),
         GPIO_BUTTON(TOPEET_VOLUME_DN, KEY_VOLUMEDOWN, 1, "volume-down", 0, 1),
-        GPIO_BUTTON(TOPEET_POWER_OFF, KEY_POWER, 1, "power-key", 1, 1),
+        //GPIO_BUTTON(TOPEET_POWER_OFF, KEY_POWER, 1, "power-key", 1, 1),
 };
 
 static struct gpio_keys_platform_data new_topeet_button_data = {
@@ -2320,6 +2322,7 @@ static void __init mx6_topeet_board_init(void)
 			ARRAY_SIZE(mxc_i2c1_board_info));
 	i2c_register_board_info(2, mxc_i2c2_board_info,
 			ARRAY_SIZE(mxc_i2c2_board_info));
+#if 0	//remove by cym 20160722
         ret = gpio_request(TOPEET_PFUZE_INT, "pFUZE-int");
 	if (ret) {
 		printk(KERN_ERR"request pFUZE-int error!!\n");
@@ -2328,6 +2331,7 @@ static void __init mx6_topeet_board_init(void)
                 gpio_direction_input(TOPEET_PFUZE_INT);
                 mx6q_sabresd_init_pfuze100(TOPEET_PFUZE_INT);
 	}
+#endif
 	/* SPI */
         imx6q_add_ecspi(0, &mx6q_topeet_spi_data);
 	spi_device_init();
