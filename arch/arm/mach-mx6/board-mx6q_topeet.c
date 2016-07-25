@@ -94,8 +94,8 @@
 #define TOPEET_USR_DEF_GRN_LED	IMX_GPIO_NR(1, 1)
 #define TOPEET_BT_RESET	IMX_GPIO_NR(1, 2)
 #define TOPEET_USR_DEF_RED_LED	IMX_GPIO_NR(1, 2)
-#define TOPEET_VOLUME_UP	IMX_GPIO_NR(1, 9)
-#define TOPEET_VOLUME_DN	IMX_GPIO_NR(7, 13)
+#define TOPEET_VOLUME_UP	IMX_GPIO_NR(7, 13)//IMX_GPIO_NR(1, 9)
+#define TOPEET_VOLUME_DN	IMX_GPIO_NR(1, 9)//IMX_GPIO_NR(7, 13)
 #define TOPEET_MICROPHONE_DET	IMX_GPIO_NR(3, 31)
 #define TOPEET_CSI0_PWN	IMX_GPIO_NR(1, 16)
 #define TOPEET_CSI0_RST	IMX_GPIO_NR(1, 17)
@@ -226,9 +226,13 @@
 
 static struct clk *sata_clk;
 static struct clk *clko;
+#ifdef CONFIG_SENSORS_MMA8X5X
 static int mma8x5x_position;
+#endif
 static int mag3110_position = 1;
+#ifdef CONFIG_TOUCHSCREEN_MAX11801
 static int max11801_mode = 1;
+#endif
 static int caam_enabled;
 static int uart5_enabled;
 
@@ -953,23 +957,26 @@ static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 		I2C_BOARD_INFO("ov564x", 0x3c),
 		.platform_data = (void *)&camera_data,
 	},
+#ifdef CONFIG_SENSORS_MMA8X5X
 	{
 		I2C_BOARD_INFO("mma8x5x", 0x1c),
                 .irq =	gpio_to_irq(TOPEET_ACCL_INT),
 		.platform_data = (void *)&mma8x5x_position,
 	},
+#endif
 };
 
 static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("mxc_hdmi_i2c", 0x50),
 	},
-       //it is important that max11801 on touch KCONFIG and here,otherwise android can boot success,why? add by dg 2015-08-31
+#ifdef CONFIG_TOUCHSCREEN_MAX11801
 	{
 		I2C_BOARD_INFO("max11801", 0x48),
 		.platform_data = (void *)&max11801_mode,
                 .irq = gpio_to_irq(TOPEET_TS_INT),
 	},
+#endif
 #ifdef CONFIG_SND_SOC_WM8960
 	{
                 I2C_BOARD_INFO("wm8960", 0x1a),
