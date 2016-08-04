@@ -58,11 +58,11 @@ int touch_size = 0;	//0:1024*768 or 1:1280*800
  * Chip I/O operations
  */
 
-static struct i2c_client *this_client;
+//static struct i2c_client *this_client;
 
 extern int get_lcd_type();
 
-static int ft5x0x_i2c_rxdata(char *rxdata, int length) {
+static int ft5x0x_i2c_rxdata(struct i2c_client *this_client, char *rxdata, int length) {
 	int ret;
 	struct i2c_msg msgs[] = {
 		{
@@ -121,7 +121,7 @@ static int ft5x0x_write_reg(u8 addr, u8 val) {
 }
 #endif
 
-static int ft5x0x_read_reg(u8 addr, u8 *pdata) {
+static int ft5x0x_read_reg(struct i2c_client *this_client, u8 addr, u8 *pdata) {
 	u8 buf[4] = { 0 };
 	struct i2c_msg msgs[] = {
 		{
@@ -151,12 +151,12 @@ static int ft5x0x_read_reg(u8 addr, u8 *pdata) {
 	return ret;
 }
 
-static int ft5x0x_read_fw_ver(unsigned char *val)
+static int ft5x0x_read_fw_ver(struct ft5x0x_ts_data *ts, unsigned char *val)
 {
 	int ret;
 
 	*val = 0xff;
-	ret = ft5x0x_read_reg(FT5X0X_REG_FIRMID, val);
+	ret = ft5x0x_read_reg(ts->client, FT5X0X_REG_FIRMID, val);
 	if (*val == 0x06) {
 #if 0
 		swap_xy = 1;
@@ -265,9 +265,9 @@ static int ft5x0x_read_data(struct ft5x0x_ts_data *ts) {
 
 #ifdef CONFIG_FT5X0X_MULTITOUCH
 	//ret = ft5x0x_i2c_rxdata(buf, 31);
-	ret = ft5x0x_i2c_rxdata(buf, 63);
+	ret = ft5x0x_i2c_rxdata(ts->client, buf, 63);
 #else
-	ret = ft5x0x_i2c_rxdata(buf, 7);
+	ret = ft5x0x_i2c_rxdata(ts->client, buf, 7);
 #endif
 	if (ret < 0) {
 		printk("%s: read touch data failed, %d\n", __func__, ret);
@@ -344,7 +344,7 @@ static void ft5x0x_ts_pen_irq_work(struct work_struct *work) {
 		ft5x0x_ts_report(ts);
 	}
 
-	enable_irq(this_client->irq);
+	enable_irq(ts->client->irq);
 }
 
 static irqreturn_t ft5x0x_ts_interrupt(int irq, void *dev_id) {
@@ -352,7 +352,7 @@ static irqreturn_t ft5x0x_ts_interrupt(int irq, void *dev_id) {
 
       //  printk("%s(%d)\n", __FUNCTION__, __LINE__);
 
-	disable_irq_nosync(this_client->irq);
+	disable_irq_nosync(ts->client->irq);
 
 	if (!work_pending(&ts->work)) {
 		queue_work(ts->queue, &ts->work);
@@ -374,7 +374,7 @@ static void ft5x0x_ts_suspend(struct early_suspend *handler)
 
 	ts = container_of(handler, struct ft5x0x_ts_data, early_suspend);
 
-	disable_irq(this_client->irq);
+	disable_irq(ts->client->irq);
 	flush_workqueue(ts->queue);
 	cancel_work_sync(&ts->work);
 	//flush_workqueue(ts->queue);
@@ -397,6 +397,9 @@ static void ft5x0x_ts_suspend(struct early_suspend *handler)
 
 static void ft5x0x_ts_resume(struct early_suspend *handler)
 {
+	struct ft5x0x_ts_data *ts;
+
+        ts = container_of(handler, struct ft5x0x_ts_data, early_suspend);
 #if 0
 	if( IS_ERR_OR_NULL(dc33v_tp) )
 	{
@@ -411,7 +414,7 @@ static void ft5x0x_ts_resume(struct early_suspend *handler)
 #endif	
 #if 1
 	/* Wakeup: output_L --> 100ms --> output_H --> 100ms */
-	enable_irq(this_client->irq);
+	enable_irq(ts->client->irq);
 #endif
 
 	printk("ft5x0x_ts: resumed\n");
@@ -468,7 +471,8 @@ static int ft5x0x_ts_probe(struct i2c_client *client, const struct i2c_device_id
 	ts->gpio_reset = pdata->gpio_reset;
 
 	INIT_WORK(&ts->work, ft5x0x_ts_pen_irq_work);
-	this_client = client;
+	//this_client = client;
+	ts->client = client;
 	i2c_set_clientdata(client, ts);
 
 	ts->queue = create_singlethread_workqueue(dev_name(&client->dev));
@@ -531,7 +535,7 @@ static int ft5x0x_ts_probe(struct i2c_client *client, const struct i2c_device_id
 
 	unsigned int i = 0;
 	printk("read fw ver %d...\n", i++);
-	err = ft5x0x_read_fw_ver(&val);
+	err = ft5x0x_read_fw_ver(ts, &val);
 
 	if (err < 0) {
 		dev_err(&client->dev, "chip not found\n");

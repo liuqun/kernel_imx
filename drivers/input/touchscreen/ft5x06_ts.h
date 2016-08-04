@@ -107,6 +107,10 @@ struct ft5x0x_ts_data {
 	struct work_struct work;
 	struct workqueue_struct *queue;
 
+	/* add by cym 20160804 */
+        struct i2c_client *client;
+        /* end add */
+
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	struct early_suspend early_suspend;
 #endif

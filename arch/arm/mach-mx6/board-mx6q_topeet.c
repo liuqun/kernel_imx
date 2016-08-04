@@ -984,6 +984,14 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
         },
 #endif
 
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+        {
+                I2C_BOARD_INFO("ft5x0x_ts", 0x70>>1),
+                .irq = gpio_to_irq(IMX_GPIO_NR(6, 8)),
+                .platform_data = &ft5x0x_pdata1,
+        },
+#endif
+
 };
 
 static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
