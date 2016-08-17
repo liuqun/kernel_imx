@@ -698,7 +698,7 @@ static int __init ft5x0x_ts_init(void)
         gpio_direction_input(SABRESD_CAP_TCH_INT1);
         gpio_free(SABRESD_CAP_TCH_INT1);
 
-       printk("ft5x0x:********topeet init gpio input********** \n");
+       //printk("ft5x0x:********topeet init gpio input********** \n");
 
 #endif
 	//type = get_lcd_type();

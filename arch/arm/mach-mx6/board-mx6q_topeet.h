@@ -60,7 +60,7 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_RGMII_RD3__ENET_RGMII_RD3,
 	MX6Q_PAD_RGMII_RX_CTL__ENET_RGMII_RX_CTL,
 	MX6Q_PAD_ENET_TX_EN__GPIO_1_28,		/* Micrel RGMII Phy Interrupt */
-	MX6Q_PAD_EIM_D23__GPIO_3_23,		/* RGMII reset */
+	//cym MX6Q_PAD_EIM_D23__GPIO_3_23,		/* RGMII reset */
 	MX6Q_PAD_GPIO_16__ENET_ANATOP_ETHERNET_REF_OUT, /* Internal connect for 1588 TS Clock */
 
 	/* GPIO1 */
@@ -198,7 +198,10 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 
 	/* USB OC pin */
 	MX6Q_PAD_EIM_D21__USBOH3_USBOTG_OC,
-	MX6Q_PAD_EIM_D30__USBOH3_USBH1_OC,
+	//MX6Q_PAD_EIM_D30__USBOH3_USBH1_OC,
+
+	//add by cym 20160816 for MT6620
+	MX6Q_PAD_EIM_D30__GPIO_3_30,
 
 	/* USDHC2 */
 	MX6Q_PAD_SD2_CLK__USDHC2_CLK,

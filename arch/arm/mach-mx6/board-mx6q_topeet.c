@@ -127,10 +127,11 @@
 #define TOPEET_PCIE_PWR_EN	IMX_GPIO_NR(3, 19)
 #define TOPEET_USB_OTG_PWR	IMX_GPIO_NR(3, 22)
 #define TOPEET_USB_H1_PWR	IMX_GPIO_NR(1, 29)
-#define TOPEET_CHARGE_CHG_1_B	IMX_GPIO_NR(3, 23)
+#define TOPEET_CHARGE_CHG_1_B	IMX_GPIO_NR(3, 2)//cym IMX_GPIO_NR(3, 23)
 #define TOPEET_TS_INT		IMX_GPIO_NR(3, 26)
 #define TOPEET_DISP0_RD	IMX_GPIO_NR(3, 28)
-#define TOPEET_POWER_OFF	IMX_GPIO_NR(3, 29)
+#define TOPEET_POWER_OFF	IMX_GPIO_NR(2, 2)//IMX_GPIO_NR(3, 29)
+#define TOPEET_BACK        	IMX_GPIO_NR(6, 9)
 
 #define TOPEET_CAN1_STBY	IMX_GPIO_NR(4, 5)
 #define TOPEET_ECSPI1_CS0  IMX_GPIO_NR(4, 9)
@@ -211,11 +212,11 @@
 
 /* add by cym 20160712 */
 #define CFG_IO_MT6620_CD_PIN		IMX_GPIO_NR(2, 0)//IMX_GPIO_NR(3, 2)
-#define CFG_IO_MT6620_TRIGGER_PIN	IMX_GPIO_NR(3, 2)//IMX_GPIO_NR(2, 0)
+#define CFG_IO_MT6620_TRIGGER_PIN	IMX_GPIO_NR(3, 23)//cym IMX_GPIO_NR(3, 2)//IMX_GPIO_NR(2, 0)
 #define CFG_IO_MT6620_POWER_PIN		IMX_GPIO_NR(6, 18)
 #define CFG_IO_MT6620_SYSRST_PIN	IMX_GPIO_NR(6, 17)
-#define CFG_IO_MT6620_BGF_INT_PIN	IMX_GPIO_NR(3, 8)
-#define CFG_IO_MT6620_WIFI_INT_PIN	IMX_GPIO_NR(3, 10)
+#define CFG_IO_MT6620_BGF_INT_PIN	IMX_GPIO_NR(3, 31)//cym IMX_GPIO_NR(3, 8)
+#define CFG_IO_MT6620_WIFI_INT_PIN	IMX_GPIO_NR(3, 30)//cym IMX_GPIO_NR(3, 10)
 
 /* end add */
 
@@ -1823,7 +1824,8 @@ static struct gpio_keys_platform_data topeet_button_data = {
 static struct gpio_keys_button new_topeet_buttons[] = {
         GPIO_BUTTON(TOPEET_VOLUME_UP, KEY_VOLUMEUP, 1, "volume-up", 0, 1),
         GPIO_BUTTON(TOPEET_VOLUME_DN, KEY_VOLUMEDOWN, 1, "volume-down", 0, 1),
-        //GPIO_BUTTON(TOPEET_POWER_OFF, KEY_POWER, 1, "power-key", 1, 1),
+	GPIO_BUTTON(TOPEET_BACK, KEY_BACK, 1, "key-back", 0, 1),
+        GPIO_BUTTON(TOPEET_POWER_OFF, KEY_POWER, 1, "power-key", 1, 1),
 };
 
 static struct gpio_keys_platform_data new_topeet_button_data = {
