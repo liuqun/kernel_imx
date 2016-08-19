@@ -198,11 +198,21 @@ static iomux_v3_cfg_t mx6q_arm2_spdif_pads[] = {
 
 static iomux_v3_cfg_t mx6q_arm2_can_pads[] = {
 	/* CAN1 */
+#if 0	//remove by cym 20160817
 	MX6Q_PAD_GPIO_7__CAN1_TXCAN,
 	MX6Q_PAD_KEY_ROW2__CAN1_RXCAN,
 	MX6Q_PAD_GPIO_17__GPIO_7_12,	/* CAN1 STBY */
 	MX6Q_PAD_GPIO_19__GPIO_4_5,//cym MX6Q_PAD_GPIO_18__GPIO_7_13,	/* CAN1 EN */
+#else
+	MX6Q_PAD_KEY_ROW2__HDMI_TX_CEC_LINE,
+        /* MX6Q_PAD_KEY_COL2__CAN1_TXCAN, */
+        MX6Q_PAD_GPIO_1__WDOG2_WDOG_B,          /*WDOG_B to reset pmic*/
+        MX6Q_PAD_GPIO_2__GPIO_1_2,              /* user defined red led */
 
+	MX6Q_PAD_GPIO_7__CAN1_TXCAN, // GPIO_7 - CAN1_TX
+        MX6Q_PAD_GPIO_8__CAN1_RXCAN, // GPIO_8 - CAN1_RX
+        MX6Q_PAD_GPIO_19__GPIO_4_5, // KEY_COL5 - CAN1_STBY
+#endif
 	/* CAN2 */
 	MX6Q_PAD_KEY_COL4__CAN2_TXCAN,
 	MX6Q_PAD_KEY_ROW4__CAN2_RXCAN,

@@ -32,7 +32,15 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	/* MX6Q_PAD_KEY_COL2__CAN1_TXCAN, */
 	MX6Q_PAD_GPIO_1__WDOG2_WDOG_B,		/*WDOG_B to reset pmic*/
 	MX6Q_PAD_GPIO_2__GPIO_1_2,		/* user defined red led */
+/* modify by cym 20160817 */
+#if 0
 	MX6Q_PAD_GPIO_7__GPIO_1_7,		/* NERR */
+#else
+	MX6Q_PAD_GPIO_7__CAN1_TXCAN, // GPIO_7 - CAN1_TX
+	MX6Q_PAD_GPIO_8__CAN1_RXCAN, // GPIO_8 - CAN1_RX
+	MX6Q_PAD_GPIO_19__GPIO_4_5, // KEY_COL5 - CAN1_STBY
+#endif
+/* end modify */
 
 	/* CCM  */
 	MX6Q_PAD_GPIO_0__CCM_CLKO,		/* SGTL500 sys_mclk */
@@ -169,7 +177,7 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_DISP0_DAT21__IPU1_DISP0_DAT_21,
 	MX6Q_PAD_DISP0_DAT22__IPU1_DISP0_DAT_22,
 	MX6Q_PAD_DISP0_DAT23__IPU1_DISP0_DAT_23,
-	MX6Q_PAD_GPIO_7__GPIO_1_7,		/* J7 - Display Connector GP */
+	//cym MX6Q_PAD_GPIO_7__GPIO_1_7,		/* J7 - Display Connector GP */
 	//cym MX6Q_PAD_GPIO_9__GPIO_1_9,		/* J7 - Display Connector GP */
 	/* MX6Q_PAD_NANDF_D0__GPIO_2_0,*/	/* J6 - LVDS Display contrast */
 

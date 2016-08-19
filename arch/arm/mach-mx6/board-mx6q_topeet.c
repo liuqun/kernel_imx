@@ -1414,12 +1414,20 @@ static struct ahci_platform_data mx6q_topeet_sata_data = {
 };
 #endif
 
+static struct gpio mx6_flexcan_gpios[] = {
+        //{ MX6_ARM2_CAN1_EN, GPIOF_OUT_INIT_LOW, "flexcan1-en" },
+        { TOPEET_CAN1_STBY, GPIOF_OUT_INIT_LOW, "flexcan1-stby" },
+        //{ MX6_ARM2_CAN2_EN, GPIOF_OUT_INIT_LOW, "flexcan2-en" },
+};
+
 static void mx6q_topeet_flexcan0_switch(int enable)
 {
 	if (enable) {
-                gpio_set_value(TOPEET_CAN1_STBY, 1);
-	} else {
+		//printk("fun:%s, line = %d(en = %d)\n", __FUNCTION__, __LINE__, enable);
                 gpio_set_value(TOPEET_CAN1_STBY, 0);
+	} else {
+		//printk("fun:%s, line = %d(en = %d)\n", __FUNCTION__, __LINE__, enable);
+                gpio_set_value(TOPEET_CAN1_STBY, 1);
 	}
 }
 
@@ -2458,14 +2466,14 @@ static void __init mx6_topeet_board_init(void)
 			imx6dl_add_imx_epdc(&epdc_data);
 		}
 	}
-	/*
-        ret = gpio_request_array(mx6q_topeet_flexcan_gpios,
-                        ARRAY_SIZE(mx6q_topeet_flexcan_gpios));
+#if 1
+        ret = gpio_request_array(mx6_flexcan_gpios,
+                        ARRAY_SIZE(mx6_flexcan_gpios));
 	if (ret)
 		pr_err("failed to request flexcan1-gpios: %d\n", ret);
 	else
                 imx6q_add_flexcan0(&mx6q_topeet_flexcan0_pdata);
-	*/
+#endif
 
 	clko2 = clk_get(NULL, "clko2_clk");
 	if (IS_ERR(clko2))
