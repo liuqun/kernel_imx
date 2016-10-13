@@ -127,6 +127,16 @@ static struct fb_videomode ldb_modedb[] = {
 	 0,
 	 FB_VMODE_NONINTERLACED,
 	 FB_MODE_IS_DETAILED,},
+	/* add by cym 20161012 */
+	{
+         "LDB-7inch", 60, 800, 1280, 14065,
+         40, 40,
+         10, 3,
+         80, 10,
+         0,
+         FB_VMODE_NONINTERLACED,
+         FB_MODE_IS_DETAILED,},
+	/* end add */
 };
 static int ldb_modedb_sz = ARRAY_SIZE(ldb_modedb);
 

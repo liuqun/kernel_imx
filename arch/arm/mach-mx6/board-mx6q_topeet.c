@@ -949,6 +949,29 @@ static struct ft5x0x_i2c_platform_data ft5x0x_pdata2 = {
 };
 #endif
 
+/* add by cym 20161012 */
+static int __init set_touch_screen(char *options)
+{
+	if(!strstr(options, "LDB-XGA"))	//9.7
+	{
+		ft5x0x_pdata1.screen_max_x   = 768;
+		ft5x0x_pdata1.screen_max_y   = 1024;
+
+		ft5x0x_pdata2.screen_max_x   = 768;
+		ft5x0x_pdata2.screen_max_y   = 1024;
+	}
+	else if(!strstr(options, "LDB-7inch")) //7.0
+	{
+		ft5x0x_pdata1.screen_max_x   = 800;
+                ft5x0x_pdata1.screen_max_y   = 1280;
+
+                ft5x0x_pdata2.screen_max_x   = 800;
+                ft5x0x_pdata2.screen_max_y   = 1280;
+	}
+}
+
+early_param("video", set_touch_screen);
+/* end add */
 
 static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 	{

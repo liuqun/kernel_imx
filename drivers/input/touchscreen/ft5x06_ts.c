@@ -49,6 +49,8 @@
 int TOUCH_MAX_X = 1024;
 int TOUCH_MAX_Y = 768;
 
+int type = 0;
+
 static int swap_xy = 0;
 static int scal_xy = 0;
 
@@ -630,10 +632,10 @@ static struct i2c_driver ft5x0x_ts_driver = {
 static int __init ft5x0x_ts_init(void)
 {
 	int ret;
-	int type;
+	//int type;
 
 	;//type = get_lcd_type();
-	type = 0;
+	//type = 0;
 
 #if 1
         #define TP_IOCTL1       IMX_GPIO_NR(6, 15)//NANDF_CS2 CABC_EN0
@@ -756,26 +758,30 @@ static void __exit ft5x0x_ts_exit(void)
 late_initcall(ft5x0x_ts_init);
 module_exit(ft5x0x_ts_exit);
 
-#if 0
+#if 1
 static int __init setup_width_height(char *str)
 {
-        if (!strncasecmp("9.7", str, 3)) {
-                printk("000000000000000000000000\n");
+        if (strstr(str, "LDB-XGA")) {
+                //printk("000000000000000000000000\n");
                 //ft5x0x_pdata.screen_max_x = 768;
                 //ft5x0x_pdata.screen_max_y = 1024;
 		touch_size = 0;
+
+		type = 0;
         }
-        else if(!strncasecmp("7.0", str, 3))
+        else if(strstr(str, "LDB-7inch"))
         {
-                printk("1111111111111111111111111\n");
+                //printk("1111111111111111111111111\n");
                 //ft5x0x_pdata.screen_max_x = 1280;//1280;
                 //ft5x0x_pdata.screen_max_y = 800;//800;
 		touch_size = 1;
+
+		type = 1;
         }
 
         //printk("%s\n", __FUNCTION__);
 }
-early_param("lcd", setup_width_height);
+early_param("video", setup_width_height);
 #endif
 
 MODULE_AUTHOR("<wenfs@Focaltech-systems.com>");
