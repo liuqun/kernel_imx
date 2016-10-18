@@ -39,6 +39,20 @@ static struct fb_videomode lcdif_modedb[] = {
 	FB_SYNC_CLK_LAT_FALL,
 	FB_VMODE_NONINTERLACED,
 	0,},
+	/* add by cym 20161017 */
+        {
+        /* 1024*768 @ 70 Hz , pixel clk @ 75MHz */
+        "VGA_1024768", 70, 1024, 768, 13346, 144, 24, 29, 3, 136, 6,
+        FB_SYNC_HOR_HIGH_ACT | FB_SYNC_VERT_HIGH_ACT,
+        FB_VMODE_NONINTERLACED,
+        0,},
+	{
+        /* 480*272 @ 60 Hz , pixel clk @ 75MHz */
+        "VGA_480272", 60, 480, 272, 29850, 89, 164, 23, 10, 10, 10,
+        FB_SYNC_CLK_LAT_FALL,//FB_SYNC_HOR_HIGH_ACT | FB_SYNC_VERT_HIGH_ACT,
+        FB_VMODE_NONINTERLACED,
+        0,},
+        /* end add */
 };
 static int lcdif_modedb_sz = ARRAY_SIZE(lcdif_modedb);
 

@@ -27,6 +27,39 @@
 #include <linux/i2c.h>
 #include <linux/i2c/tsc2007.h>
 
+/* add by cym 20141202 */
+#include <linux/irq.h>
+#ifdef CONFIG_HAS_EARLYSUSPEND
+#include <linux/earlysuspend.h>
+#endif
+/* end add */
+
+/* add by cym 20130417 */
+#include <linux/proc_fs.h>
+#include <asm/uaccess.h>
+
+#define TSC2007_DEBUG_ON	0
+
+//#ifdef CONFIG_STAGING	//for Android
+#ifdef CONFIG_ANDROID
+#define GTP_ICS_SLOT_REPORT   1
+#endif
+
+#define SCREEN_MAX_X    272	//480
+#define SCREEN_MAX_Y    480	//800
+#define PRESS_MAX       255
+#define CFG_MAX_TOUCH_POINTS  1
+
+#define TSC2007_DEBUG(fmt,arg...)          do{\
+                                         if(TSC2007_DEBUG_ON)\
+                                         printk("TSC2007-DEBUG[%d]"fmt,__LINE__, ##arg);\
+                                       }while(0)
+
+#if GTP_ICS_SLOT_REPORT
+#include <linux/input/mt.h>
+#endif
+/* end add */
+
 #define TSC2007_MEASURE_TEMP0		(0x0 << 4)
 #define TSC2007_MEASURE_AUX		(0x2 << 4)
 #define TSC2007_MEASURE_TEMP1		(0x4 << 4)
@@ -81,7 +114,69 @@ struct tsc2007 {
 
 	int			(*get_pendown_state)(void);
 	void			(*clear_penirq)(void);
+
+	/* add by cym 20141202 */
+#ifdef CONFIG_HAS_EARLYSUSPEND
+	struct early_suspend early_suspend;
+#endif
+	/* end add */
 };
+
+/* add by cym 20141202 */
+int flags = 0;
+/* end add */
+
+/* add by cym 20130417 */
+static struct proc_dir_entry *ts_proc_entry;
+
+//13695 63 -1806708 72 -9270 32799468 65536
+//signed long pointercal[7] = {13662, -2, -1835668, 104, -9256, 32765962, 65536};
+signed long pointercal[7] = {-8317, 14, 33618640, -2, -4904, 18777894, 65536};
+
+static int ts_proc_write(struct file *file, const char *buffer,
+			     unsigned long count, void *data)
+{
+	char buf[256];
+	unsigned long len;
+	char *p = (char *)buf;
+	int i,j;
+	int flag = 1;
+
+	memset(buf,0,256);
+	len = min_t(unsigned long, sizeof(buf) - 1, count);
+
+	if (copy_from_user(buf, buffer, len))
+		return count;
+
+	j = 0;
+	for(i=0;i<len;i++)
+	{
+		if(flag)
+		{
+			pointercal[j] = simple_strtol(p, &p, 10);
+
+			j++; 
+			if(j>=7)
+				break;
+
+			flag = 0;
+		}
+		
+
+		if(p[0] == ' ')
+		{
+			flag = 1;
+		}
+		if(p[0] == '\t')
+		{
+			flag = 1;
+		}
+		p++;
+	}
+	return count;
+
+}
+/* end add */
 
 static inline int tsc2007_xfer(struct tsc2007 *tsc, u8 cmd)
 {
@@ -107,6 +202,10 @@ static inline int tsc2007_xfer(struct tsc2007 *tsc, u8 cmd)
 
 static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 {
+	/* add by cym 20130417 */
+	long a,b,c,d,e,f,div;
+	/* end add */
+
 	/* y- still on; turn on only y+ (and ADC) */
 	tc->y = tsc2007_xfer(tsc, READ_Y);
 
@@ -117,6 +216,21 @@ static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 	tc->z1 = tsc2007_xfer(tsc, READ_Z1);
 	tc->z2 = tsc2007_xfer(tsc, READ_Z2);
 
+	/* add by cym 20130417 */
+//#if GTP_ICS_SLOT_REPORT
+	a = pointercal[0];
+	b = pointercal[1];
+	c = pointercal[2];
+	d = pointercal[3];
+	e = pointercal[4];
+	f = pointercal[5];
+	div = pointercal[6];
+
+	tc->x = (a*tc->x + b*tc->y + c)/div;
+	tc->y = (d*tc->x + e*tc->y + f)/div;
+//#endif
+	/* end add */
+	//printk("x:%d, y:%d\n", tc->x, tc->y);
 	/* Prepare for next touch reading - power down ADC, enable PENIRQ */
 	tsc2007_xfer(tsc, PWRDOWN);
 }
@@ -146,19 +260,27 @@ static void tsc2007_send_up_event(struct tsc2007 *tsc)
 	struct input_dev *input = tsc->input;
 
 	dev_dbg(&tsc->client->dev, "UP\n");
+	TSC2007_DEBUG("UP\n");
 
+#if GTP_ICS_SLOT_REPORT
+	input_mt_slot(input, 0);
+    	input_report_abs(input, ABS_MT_TRACKING_ID, -1);
+#else
 	input_report_key(input, BTN_TOUCH, 0);
 	input_report_abs(input, ABS_PRESSURE, 0);
+#endif
 	input_sync(input);
 }
 
 static void tsc2007_work(struct work_struct *work)
 {
+	static u16 x_10 = 0, y_10 = 0, i = 0, x_10_pre = 0, y_10_pre = 0, cmp_x = 0, cmp_y = 0;
 	struct tsc2007 *ts =
 		container_of(to_delayed_work(work), struct tsc2007, work);
 	bool debounced = false;
 	struct ts_event tc;
 	u32 rt;
+	u16 x, y;
 
 	/*
 	 * NOTE: We can't rely on the pressure to determine the pen down
@@ -174,11 +296,12 @@ static void tsc2007_work(struct work_struct *work)
 	 */
 	if (ts->get_pendown_state) {
 		if (unlikely(!ts->get_pendown_state())) {
+		//if (!ts->get_pendown_state())) {
 			tsc2007_send_up_event(ts);
 			ts->pendown = false;
 			goto out;
 		}
-
+		TSC2007_DEBUG("pen is still down\n");
 		dev_dbg(&ts->client->dev, "pen is still down\n");
 	}
 
@@ -197,48 +320,133 @@ static void tsc2007_work(struct work_struct *work)
 
 	}
 
-	if (rt) {
+	if(rt)
+	{
+		if(tc.x > x_10_pre)
+			cmp_x = tc.x - x_10_pre;
+		else
+			cmp_x = x_10_pre - tc.x;
+
+		if(tc.y > y_10_pre)
+                        cmp_y = tc.y - y_10_pre;
+                else
+                        cmp_y = y_10_pre - tc.y;
+
+		if((cmp_x<4) && (cmp_y<4))
+		{
+			x_10 += x_10_pre;//tc.x;
+			y_10 += y_10_pre;//tc.y;
+			i++;
+
+			//x_10_pre = tc.x;
+			//y_10_pre = tc.y;
+		}
+		else
+		{
+			x_10 = 0;
+			y_10 = 0;
+			i = 0;
+			
+			x_10_pre = tc.x;
+			y_10_pre = tc.y;
+
+			x_10 += tc.x;
+                        y_10 += tc.y;
+                        i++;
+
+			//x_10_pre = tc.x;
+                        //y_10_pre = tc.y;
+		}
+	}
+
+	if (rt && (1 == i)) {
+		tc.x = x_10/i;
+		tc.y = y_10/i;
+
+		x_10 = 0;
+		y_10 = 0;
+		i = 0;
+
 		struct input_dev *input = ts->input;
 
 		if (!ts->pendown) {
 			dev_dbg(&ts->client->dev, "DOWN\n");
-
+			TSC2007_DEBUG("DOWN\n");
 			input_report_key(input, BTN_TOUCH, 1);
 			ts->pendown = true;
 		}
-
+#if 0
+		;//x = SCREEN_MAX_X - tc.y;
+		x = tc.x;
+		y = tc.y;
+		/* modify by cym 20160115 */
+#if 0
+		y = tc.x;
+#else
+		;//y = tc.x - 20;
+#endif
+		/* end modify */
+#else
+		x = (tc.x * 48)/80;
+		y = (tc.y * 80)/48;
+#endif	
+		TSC2007_DEBUG("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);
+		//printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
+#if GTP_ICS_SLOT_REPORT
+		//input_mt_slot(input, 0);
+		//input_report_abs(input, ABS_MT_TRACKING_ID, 0);
+    		input_report_abs(input, ABS_MT_POSITION_X, x);
+		input_report_abs(input, ABS_MT_POSITION_Y, y);
+		//input_report_abs(input, ABS_MT_WIDTH_MAJOR, 1);
+		input_report_abs(input, ABS_MT_PRESSURE, x+y);
+		input_report_abs(input, ABS_MT_TOUCH_MAJOR, x+y);
+		input_report_abs(input, ABS_MT_TRACKING_ID, 0);
+#else
 		input_report_abs(input, ABS_X, tc.x);
 		input_report_abs(input, ABS_Y, tc.y);
+		//input_report_key(input, BTN_TOUCH, 1);
 		input_report_abs(input, ABS_PRESSURE, rt);
-
+#endif
 		input_sync(input);
 
 		dev_dbg(&ts->client->dev, "point(%4d,%4d), pressure (%4u)\n",
 			tc.x, tc.y, rt);
 
-	} else if (!ts->get_pendown_state && ts->pendown) {
+	}
+	else if(!ts->get_pendown_state && ts->pendown) {
 		/*
 		 * We don't have callback to check pendown state, so we
 		 * have to assume that since pressure reported is 0 the
 		 * pen was lifted up.
 		 */
+		 TSC2007_DEBUG("tsc2007_send_up_event\n");
 		tsc2007_send_up_event(ts);
 		ts->pendown = false;
 	}
 
  out:
+	/* modify by cym 20141202 */
+#if 0
 	if (ts->pendown || debounced)
+#else
+	if ((ts->pendown || debounced) && (0 == flags))
+#endif
+	/* end modify */
 		schedule_delayed_work(&ts->work,
 				      msecs_to_jiffies(ts->poll_period));
 	else
 		enable_irq(ts->irq);
+
 }
 
 static irqreturn_t tsc2007_irq(int irq, void *handle)
 {
 	struct tsc2007 *ts = handle;
 
-	if (!ts->get_pendown_state || likely(ts->get_pendown_state())) {
+	//printk("%s, line = %d\n", __FUNCTION__, __LINE__);
+#if 1
+	if (!ts->get_pendown_state || likely(ts->get_pendown_state())) 
+	{
 		disable_irq_nosync(ts->irq);
 		schedule_delayed_work(&ts->work,
 				      msecs_to_jiffies(ts->poll_delay));
@@ -246,7 +454,7 @@ static irqreturn_t tsc2007_irq(int irq, void *handle)
 
 	if (ts->clear_penirq)
 		ts->clear_penirq();
-
+#endif
 	return IRQ_HANDLED;
 }
 
@@ -262,6 +470,40 @@ static void tsc2007_free_irq(struct tsc2007 *ts)
 		enable_irq(ts->irq);
 	}
 }
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void tsc2007_ts_suspend(struct early_suspend *handler)
+{
+#ifdef CONFIG_STAGING	//for Android
+	struct tsc2007 *ts;
+	
+	ts = container_of(handler, struct tsc2007, early_suspend);
+
+	//cancel_delayed_work_sync(&ts->work);
+	
+	disable_irq(ts->client->irq);
+
+	flags = 1;
+#endif
+
+	printk("tsc2007_ts: suspended\n");
+}
+
+static void tsc2007_ts_resume(struct early_suspend *handler)
+{
+#ifdef CONFIG_STAGING   //for Android
+        struct tsc2007 *ts;
+
+        ts = container_of(handler, struct tsc2007, early_suspend);
+
+        enable_irq(ts->client->irq);
+
+	flags = 0;
+#endif
+
+	printk("tsc2007_ts: resumed\n");
+}
+#endif
 
 static int __devinit tsc2007_probe(struct i2c_client *client,
 				   const struct i2c_device_id *id)
@@ -300,32 +542,51 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 	ts->get_pendown_state = pdata->get_pendown_state;
 	ts->clear_penirq      = pdata->clear_penirq;
 
-	pdata->init_platform_hw();
-
-	if (tsc2007_xfer(ts, PWRDOWN) < 0) {
-		err = -ENODEV;
-		goto err_no_dev;
-	}
-
 	snprintf(ts->phys, sizeof(ts->phys),
-		 "%s/input0", dev_name(&client->dev));
+		 "%s/ts2007", dev_name(&client->dev));
 
 	input_dev->name = "TSC2007 Touchscreen";
 	input_dev->phys = ts->phys;
 	input_dev->id.bustype = BUS_I2C;
 
-	input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
-	input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+#if GTP_ICS_SLOT_REPORT
+	input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
+	input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
+
+	set_bit(INPUT_PROP_DIRECT, input_dev->propbit);
+	input_mt_init_slots(input_dev, 255);
+
+	input_set_abs_params(input_dev, ABS_X, 0, SCREEN_MAX_X, 0, 0);
+	input_set_abs_params(input_dev, ABS_Y, 0, SCREEN_MAX_Y, 0, 0);
+	input_set_abs_params(input_dev, ABS_PRESSURE, 0, 255, 0, 0);
+	input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0, SCREEN_MAX_X, 0, 0);
+	input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0, SCREEN_MAX_Y, 0, 0);
+	input_set_abs_params(input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
+	input_set_abs_params(input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+	input_set_abs_params(input_dev, ABS_MT_PRESSURE, 0, 255, 0, 0);
+    	input_set_abs_params(input_dev, ABS_MT_TRACKING_ID, 0, CFG_MAX_TOUCH_POINTS, 0, 0);
+#else
+	set_bit(EV_SYN, input_dev->evbit);
+	set_bit(EV_ABS, input_dev->evbit);
+	set_bit(EV_KEY, input_dev->evbit);
+
+	//input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
+	//input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+	set_bit(ABS_X, input_dev->absbit);
+	set_bit(ABS_Y, input_dev->absbit);
+	set_bit(ABS_PRESSURE, input_dev->absbit);
+	set_bit(BTN_TOUCH, input_dev->keybit);
 
 	input_set_abs_params(input_dev, ABS_X, 0, MAX_12BIT, pdata->fuzzx, 0);
 	input_set_abs_params(input_dev, ABS_Y, 0, MAX_12BIT, pdata->fuzzy, 0);
 	input_set_abs_params(input_dev, ABS_PRESSURE, 0, MAX_12BIT,
 			pdata->fuzzz, 0);
+#endif
 
 	if (pdata->init_platform_hw)
 		pdata->init_platform_hw();
 
-	err = request_irq(ts->irq, tsc2007_irq, 0,
+	err = request_irq(ts->irq, tsc2007_irq, IRQ_TYPE_EDGE_FALLING,
 			client->dev.driver->name, ts);
 	if (err < 0) {
 		dev_err(&client->dev, "irq %d busy?\n", ts->irq);
@@ -343,6 +604,22 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 
 	i2c_set_clientdata(client, ts);
 
+	/* add by cym 20130417 */
+	ts_proc_entry = create_proc_entry("driver/micc_ts", 0, NULL);   
+	if (ts_proc_entry) {   
+		ts_proc_entry->write_proc = ts_proc_write;   
+	}
+	/* end add */
+
+	/* add by cym 20141202 */
+#ifdef CONFIG_HAS_EARLYSUSPEND
+	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_DISABLE_FB + 1;
+	ts->early_suspend.suspend = tsc2007_ts_suspend;
+	ts->early_suspend.resume = tsc2007_ts_resume;
+	register_early_suspend(&ts->early_suspend);
+#endif
+	/* end add */
+
 	return 0;
 
  err_free_irq:
@@ -351,8 +628,6 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 		pdata->exit_platform_hw();
  err_free_mem:
 	input_free_device(input_dev);
- err_no_dev:
-	pdata->exit_platform_hw();
 	kfree(ts);
 	return err;
 }
@@ -400,7 +675,8 @@ static void __exit tsc2007_exit(void)
 	i2c_del_driver(&tsc2007_driver);
 }
 
-module_init(tsc2007_init);
+//module_init(tsc2007_init);
+late_initcall(tsc2007_init);
 module_exit(tsc2007_exit);
 
 MODULE_AUTHOR("Kwangwoo Lee <kwlee@mtekvision.com>");

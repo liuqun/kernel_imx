@@ -930,6 +930,36 @@ static struct fsl_mxc_lightsensor_platform_data ls_data = {
 	.rext = 499,	/* calibration: 499K->700K */
 };
 
+/* add by cym 20161018 */
+#ifdef CONFIG_TOUCHSCREEN_TSC2007
+#include <linux/i2c/tsc2007.h>
+
+#define GPIO_TSC_PORT (IMX_GPIO_NR(3, 9))//((PAD_GPIO_C + 26))
+static int ts_get_pendown_state(void)
+{
+        int val;
+
+        val = gpio_get_value(GPIO_TSC_PORT);
+
+        return !val;
+}
+
+static int ts_init(void)
+{
+        //gpio_to_irq(GPIO_TSC_PORT);
+
+        return 0;
+}
+
+static struct tsc2007_platform_data tsc2007_info = {
+        .model                  = 2007,
+        .x_plate_ohms           = 180,
+        .get_pendown_state      = ts_get_pendown_state,
+        .init_platform_hw       = ts_init,
+};
+
+#endif
+/* end add */
 
 #ifdef CONFIG_TOUCHSCREEN_FT5X0X
 #include <mach/ft5x0x_touch.h>
@@ -1019,11 +1049,12 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 };
 
 static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
-
+#if 0
 	{
 		I2C_BOARD_INFO("max17135", 0x48),
 		.platform_data = &max17135_pdata,
 	},
+#endif
 #if 0
 	{
 		I2C_BOARD_INFO("egalax_ts", 0x4),
@@ -1057,7 +1088,15 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
         },
 #endif
 
-
+/* add by cym 20161018 */
+#ifdef CONFIG_TOUCHSCREEN_TSC2007
+	{
+                I2C_BOARD_INFO("tsc2007", 0x48),
+                .irq = gpio_to_irq(IMX_GPIO_NR(3, 9)),
+                .platform_data = &tsc2007_info,
+        },
+#endif
+/* end add */
 
 };
 
