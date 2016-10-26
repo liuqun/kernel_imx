@@ -129,10 +129,10 @@ static struct fb_videomode ldb_modedb[] = {
 	 FB_MODE_IS_DETAILED,},
 	/* add by cym 20161012 */
 	{
-         "LDB-7inch", 60, 800, 1280, 14065,
-         40, 40,
-         10, 3,
-         80, 10,
+         "LDB-7inch", 60, 800, 1280, 17385,
+         220, 40,
+         21, 7,
+         60, 10,
          0,
          FB_VMODE_NONINTERLACED,
          FB_MODE_IS_DETAILED,},
