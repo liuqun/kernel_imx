@@ -2419,6 +2419,19 @@ static void __init mx6_topeet_board_init(void)
                 mx6q_sabresd_init_pfuze100(TOPEET_PFUZE_INT);
 	}
 #endif
+
+/* add by cym 20161214 */
+#if 1
+#define TOPEET_EC20_RESET IMX_GPIO_NR(6, 11)
+
+        gpio_set_value(TOPEET_EC20_RESET, 1);
+        mdelay(20);
+        gpio_set_value(TOPEET_EC20_RESET, 0);
+        mdelay(30);
+        gpio_set_value(TOPEET_EC20_RESET, 1);
+#endif
+/* end add */
+
 	/* SPI */
         imx6q_add_ecspi(0, &mx6q_topeet_spi_data);
 	spi_device_init();
