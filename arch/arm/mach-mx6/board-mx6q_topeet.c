@@ -2268,7 +2268,7 @@ static void __init mtk_combo_init(void)
     return;
 }
 
-static int  itop4418_wifi_combo_module_gpio_init(void)
+static int  itop6x_wifi_combo_module_gpio_init(void)
 {
 
     mtk_combo_init();
@@ -2276,6 +2276,21 @@ static int  itop4418_wifi_combo_module_gpio_init(void)
     platform_device_register(&mtk_sdio_eint_dev);
 }
 
+#endif
+/* end add */
+
+/* add by cym 20161214 */
+#if defined(CONFIG_LEDS_CTL)
+struct platform_device leds_plat_device = {
+        .name   = "leds_ctl",
+        .id             = -1,
+};
+
+static int  itop6x_leds_init(void)
+{
+	printk("plat: add device leds\n");
+    	platform_device_register(&leds_plat_device);
+}
 #endif
 /* end add */
 
@@ -2611,7 +2626,13 @@ static void __init mx6_topeet_board_init(void)
 
 /* add by cym 20160712 */
 #if defined(CONFIG_MTK_COMBO_MT66XX)
-        itop4418_wifi_combo_module_gpio_init();
+        itop6x_wifi_combo_module_gpio_init();
+#endif
+/* end add */
+
+/* add by cym 20161214 */
+#if defined(CONFIG_LEDS_CTL)
+	itop6x_leds_init();
 #endif
 /* end add */
 }

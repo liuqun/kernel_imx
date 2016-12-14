@@ -669,5 +669,13 @@ config MXS_VIIM
 	help
 	  Support for access to MXS Virtual IIM device, most people should say N here.
 
+#add by cym 20161214
+config LEDS_CTL
+        bool "Enable LEDS config"
+        default y
+        help
+          Enable LEDS config
+#end add
+
 endmenu
 
