@@ -681,6 +681,12 @@ config LEDS_CTL
         default y
         help
           Enable LEDS config
+
+config MAX485_CTL
+        tristate "Enable MAX485 config"
+        default y
+        help
+          Enable MAX485 config
 #end add
 
 endmenu

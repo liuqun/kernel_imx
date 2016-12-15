@@ -2286,13 +2286,12 @@ struct platform_device leds_plat_device = {
         .id             = -1,
 };
 
-static int  itop6x_leds_init(void)
+static int itop6x_leds_init(void)
 {
 	printk("plat: add device leds\n");
     	platform_device_register(&leds_plat_device);
 }
 #endif
-/* end add */
 
 #if defined(CONFIG_BUZZER_CTL)
 struct platform_device buzzer_plat_device = {
@@ -2300,12 +2299,26 @@ struct platform_device buzzer_plat_device = {
         .id             = -1,
 };
 
-static int  itop6x_buzzer_init(void)
+static int itop6x_buzzer_init(void)
 {
         printk("plat: add device buzzer\n");
         platform_device_register(&buzzer_plat_device);
 }
 #endif
+
+#if defined(CONFIG_MAX485_CTL)
+struct platform_device max485_plat_device = {
+        .name   = "max485_ctl",
+        .id             = -1,
+};
+
+static int itop6x_max485_ctl_init(void)
+{
+        printk("plat: add device max485_ctl\n");
+        platform_device_register(&max485_plat_device);
+}
+#endif
+/* end add */
 
 /*!
  * Board specific initialization.
@@ -2650,6 +2663,10 @@ static void __init mx6_topeet_board_init(void)
 
 #if defined(CONFIG_BUZZER_CTL)
 	itop6x_buzzer_init();
+#endif
+
+#if defined(CONFIG_MAX485_CTL)
+	itop6x_max485_ctl_init();
 #endif
 /* end add */
 }
