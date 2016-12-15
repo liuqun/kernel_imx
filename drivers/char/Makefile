@@ -71,7 +71,7 @@ obj-$(CONFIG_DEVIR)		+= ir.o
 js-rtc-y = rtc.o
 
 #add by cym 20161214
-#obj-$(CONFIG_BUZZER_CTL)        += itop6x_buzzer.o
+obj-$(CONFIG_BUZZER_CTL)        += itop6x_buzzer.o
 obj-$(CONFIG_LEDS_CTL)        += itop6x_led.o
 #obj-$(CONFIG_MAX485_CTL)        += max485_ctl.o
 #end add

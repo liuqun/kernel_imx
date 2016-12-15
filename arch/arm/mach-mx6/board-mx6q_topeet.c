@@ -2294,6 +2294,19 @@ static int  itop6x_leds_init(void)
 #endif
 /* end add */
 
+#if defined(CONFIG_BUZZER_CTL)
+struct platform_device buzzer_plat_device = {
+        .name   = "buzzer_ctl",
+        .id             = -1,
+};
+
+static int  itop6x_buzzer_init(void)
+{
+        printk("plat: add device buzzer\n");
+        platform_device_register(&buzzer_plat_device);
+}
+#endif
+
 /*!
  * Board specific initialization.
  */
@@ -2633,6 +2646,10 @@ static void __init mx6_topeet_board_init(void)
 /* add by cym 20161214 */
 #if defined(CONFIG_LEDS_CTL)
 	itop6x_leds_init();
+#endif
+
+#if defined(CONFIG_BUZZER_CTL)
+	itop6x_buzzer_init();
 #endif
 /* end add */
 }

@@ -289,6 +289,10 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 
 	MX6Q_PAD_GPIO_4__GPIO_1_4,
 	/* end add */
+
+	/* add by cym 20161214 */
+	MX6Q_PAD_SD1_DAT2__GPIO_1_19,
+	/* end add */
 };
 
 static iomux_v3_cfg_t mx6q_topeet_csi0_sensor_pads[] = {

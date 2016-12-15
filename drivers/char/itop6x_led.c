@@ -21,7 +21,7 @@
 #define DRIVER_NAME "leds_ctl"
 
 
-#define LED_GPIO			IMX_GPIO_NR(1, 2)
+#define LED_GPIO				IMX_GPIO_NR(1, 2)
 
 
 

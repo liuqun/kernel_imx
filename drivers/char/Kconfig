@@ -670,6 +670,12 @@ config MXS_VIIM
 	  Support for access to MXS Virtual IIM device, most people should say N here.
 
 #add by cym 20161214
+config BUZZER_CTL
+        bool "Enable BUZZER config"
+        default y
+        help
+          Enable BUZZER config
+
 config LEDS_CTL
         bool "Enable LEDS config"
         default y
