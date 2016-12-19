@@ -1074,6 +1074,13 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
                 .irq = gpio_to_irq(TOPEET_ELAN_INT),
 	},
 #endif
+/* add by cym 20161219 */
+	{
+                I2C_BOARD_INFO("mag3110", 0x0e),
+                .irq = gpio_to_irq(TOPEET_eCOMPASS_INT),
+                .platform_data = (void *)&mag3110_position,
+        },
+/* end add */
 	{
 		I2C_BOARD_INFO("mxc_ldb_i2c", 0x50),
 		.platform_data = (void *)1,	/* lvds port1 */
