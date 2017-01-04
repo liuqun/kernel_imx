@@ -40,7 +40,7 @@
 #include "ft5x06_ts.h"
 
 /* NOTE: support mulititouch only */
-#ifdef CONFIG_STAGING	//in linux Qt single report
+#ifdef CONFIG_ANDROID	//CONFIG_STAGING	//in linux Qt single report
 #define CONFIG_FT5X0X_MULTITOUCH		1
 #endif
 
@@ -720,6 +720,8 @@ static int __init ft5x0x_ts_init(void)
 	}
 	else if(0x01 == type) //7.0
 	{
+		TOUCH_MAX_X = 1280;
+                TOUCH_MAX_Y = 800;
 #ifdef CONFIG_VT        //for Ubuntu
                 TOUCH_MAX_X = 800;//1280;
                 TOUCH_MAX_Y = 1280;//800;
@@ -765,7 +767,7 @@ static int __init setup_width_height(char *str)
                 //printk("000000000000000000000000\n");
                 //ft5x0x_pdata.screen_max_x = 768;
                 //ft5x0x_pdata.screen_max_y = 1024;
-		touch_size = 0;
+		//touch_size = 0;
 
 		type = 0;
         }
@@ -774,7 +776,7 @@ static int __init setup_width_height(char *str)
                 //printk("1111111111111111111111111\n");
                 //ft5x0x_pdata.screen_max_x = 1280;//1280;
                 //ft5x0x_pdata.screen_max_y = 800;//800;
-		touch_size = 1;
+		//touch_size = 1;
 
 		type = 1;
         }

@@ -982,7 +982,7 @@ static struct ft5x0x_i2c_platform_data ft5x0x_pdata2 = {
 /* add by cym 20161012 */
 static int __init set_touch_screen(char *options)
 {
-	if(!strstr(options, "LDB-XGA"))	//9.7
+	if(strstr(options, "LDB-XGA"))	//9.7
 	{
 		ft5x0x_pdata1.screen_max_x   = 768;
 		ft5x0x_pdata1.screen_max_y   = 1024;
@@ -990,7 +990,7 @@ static int __init set_touch_screen(char *options)
 		ft5x0x_pdata2.screen_max_x   = 768;
 		ft5x0x_pdata2.screen_max_y   = 1024;
 	}
-	else if(!strstr(options, "LDB-7inch")) //7.0
+	else if(strstr(options, "LDB-7inch")) //7.0
 	{
 		ft5x0x_pdata1.screen_max_x   = 800;
                 ft5x0x_pdata1.screen_max_y   = 1280;
