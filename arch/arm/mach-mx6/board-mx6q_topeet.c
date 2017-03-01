@@ -108,6 +108,10 @@
 #define TOPEET_USBH1_PWR_EN	IMX_GPIO_NR(1, 29)
 #define TOPEET_DISP0_PWR_EN	IMX_GPIO_NR(1, 30)
 
+/* add by cym 20170228 */
+#define HS0038_GPIO_IRQ         IMX_GPIO_NR(7, 12)
+/* end add */
+
 #define TOPEET_SD3_CD		IMX_GPIO_NR(2, 0)
 #define TOPEET_SD3_WP		IMX_GPIO_NR(2, 1)
 #define TOPEET_SD2_CD		IMX_GPIO_NR(1, 4)//cym IMX_GPIO_NR(2, 2)
@@ -155,7 +159,7 @@
 #define TOPEET_DI1_D0_CS	IMX_GPIO_NR(6, 31)
 
 #define TOPEET_HEADPHONE_DET	IMX_GPIO_NR(3, 31)//cym IMX_GPIO_NR(7, 8)
-#define TOPEET_PCIE_RST_B_REVB	IMX_GPIO_NR(7, 12)
+#define TOPEET_PCIE_RST_B_REVB	IMX_GPIO_NR(7, 8)
 #if 0	//remove by cym 
 #define TOPEET_PMIC_INT_B	IMX_GPIO_NR(7, 13)
 #define TOPEET_PFUZE_INT	IMX_GPIO_NR(7, 13)
@@ -626,6 +630,33 @@ static struct platform_device topeet_vwm8962_reg_devices = {
 	},
 };
 #endif
+
+/* add by cym 20170228 */
+#if defined(CONFIG_KEYBOARD_HS0038) || defined(CONFIG_KEYBOARD_HS0038_MODULE)
+static struct gpio_keys_button hs0038[] =
+{
+        {
+                .gpio       = HS0038_GPIO_IRQ,/* 4(- + backspace enter) */
+                .desc       = "hs0038",
+        },
+};
+
+static struct gpio_keys_platform_data hs0038_data =
+{
+        .buttons    = hs0038,
+        .nbuttons   = ARRAY_SIZE(hs0038),
+};
+
+static struct platform_device hs0038_device =
+{
+        .name       = "hs0038",
+        .id     = -1,
+        .dev        = {
+                .platform_data  = &hs0038_data,
+        }
+};
+#endif
+/* end add */
 
 static void mx6q_csi0_cam_powerdown(int powerdown)
 {
@@ -2674,6 +2705,12 @@ static void __init mx6_topeet_board_init(void)
 
 #if defined(CONFIG_MAX485_CTL)
 	itop6x_max485_ctl_init();
+#endif
+/* end add */
+
+/* add by cym 20170228 */
+#if defined(CONFIG_KEYBOARD_HS0038) || defined(CONFIG_KEYBOARD_HS0038_MODULE)
+	platform_device_register(&hs0038_device);
 #endif
 /* end add */
 }

@@ -563,4 +563,13 @@ config KEYBOARD_W90P910
 	  To compile this driver as a module, choose M here: the
 	  module will be called w90p910_keypad.
 
+#add by cym 20170228
+config KEYBOARD_HS0038
+	tristate "HS0038 support"
+	help
+          Say Y here to enable the hs0038
+
+          To compile this driver as a module, choose M here.
+#end add
+
 endif
