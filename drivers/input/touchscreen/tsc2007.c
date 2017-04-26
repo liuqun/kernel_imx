@@ -266,8 +266,9 @@ static void tsc2007_send_up_event(struct tsc2007 *tsc)
 	input_mt_slot(input, 0);
     	input_report_abs(input, ABS_MT_TRACKING_ID, -1);
 #else
-	input_report_key(input, BTN_TOUCH, 0);
 	input_report_abs(input, ABS_PRESSURE, 0);
+	input_report_key(input, BTN_TOUCH, 0);
+	//input_report_abs(input, ABS_PRESSURE, 0);
 #endif
 	input_sync(input);
 }
@@ -296,12 +297,15 @@ static void tsc2007_work(struct work_struct *work)
 	 */
 	if (ts->get_pendown_state) {
 		if (unlikely(!ts->get_pendown_state())) {
-		//if (!ts->get_pendown_state())) {
+		//if (!ts->get_pendown_state()) {//release
 			tsc2007_send_up_event(ts);
 			ts->pendown = false;
 			goto out;
 		}
-		TSC2007_DEBUG("pen is still down\n");
+		else	//down
+		{
+			ts->pendown = true;
+		}
 		dev_dbg(&ts->client->dev, "pen is still down\n");
 	}
 
@@ -369,12 +373,16 @@ static void tsc2007_work(struct work_struct *work)
 
 		struct input_dev *input = ts->input;
 
-		if (!ts->pendown) {
+#if 0
+		//if (!ts->pendown) {
+		if(ts->pendown) {
+			printk("fun: %s, line = %d\n", __FUNCTION__, __LINE__);
 			dev_dbg(&ts->client->dev, "DOWN\n");
 			TSC2007_DEBUG("DOWN\n");
 			input_report_key(input, BTN_TOUCH, 1);
-			ts->pendown = true;
+			//ts->pendown = true;
 		}
+#endif
 #if 0
 		;//x = SCREEN_MAX_X - tc.y;
 		x = tc.x;
@@ -391,7 +399,7 @@ static void tsc2007_work(struct work_struct *work)
 		y = (tc.y * 80)/48;
 #endif	
 		TSC2007_DEBUG("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);
-		//printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
+		printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
 #if GTP_ICS_SLOT_REPORT
 		//input_mt_slot(input, 0);
 		//input_report_abs(input, ABS_MT_TRACKING_ID, 0);
@@ -402,27 +410,32 @@ static void tsc2007_work(struct work_struct *work)
 		input_report_abs(input, ABS_MT_TOUCH_MAJOR, x+y);
 		input_report_abs(input, ABS_MT_TRACKING_ID, 0);
 #else
-		input_report_abs(input, ABS_X, tc.x);
-		input_report_abs(input, ABS_Y, tc.y);
+		input_report_abs(input, ABS_X, x);
+		input_report_abs(input, ABS_Y, y);
 		//input_report_key(input, BTN_TOUCH, 1);
 		input_report_abs(input, ABS_PRESSURE, rt);
 #endif
+
+		input_report_key(input, BTN_TOUCH, 1);
 		input_sync(input);
 
 		dev_dbg(&ts->client->dev, "point(%4d,%4d), pressure (%4u)\n",
 			tc.x, tc.y, rt);
 
 	}
+#if 0
 	else if(!ts->get_pendown_state && ts->pendown) {
 		/*
 		 * We don't have callback to check pendown state, so we
 		 * have to assume that since pressure reported is 0 the
 		 * pen was lifted up.
 		 */
+		printk("fun: %s, line = %d\n", __FUNCTION__, __LINE__);
 		 TSC2007_DEBUG("tsc2007_send_up_event\n");
 		tsc2007_send_up_event(ts);
 		ts->pendown = false;
 	}
+#endif
 
  out:
 	/* modify by cym 20141202 */
@@ -577,10 +590,9 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 	set_bit(ABS_PRESSURE, input_dev->absbit);
 	set_bit(BTN_TOUCH, input_dev->keybit);
 
-	input_set_abs_params(input_dev, ABS_X, 0, MAX_12BIT, pdata->fuzzx, 0);
-	input_set_abs_params(input_dev, ABS_Y, 0, MAX_12BIT, pdata->fuzzy, 0);
-	input_set_abs_params(input_dev, ABS_PRESSURE, 0, MAX_12BIT,
-			pdata->fuzzz, 0);
+	input_set_abs_params(input_dev, ABS_X, 0, SCREEN_MAX_X, pdata->fuzzx, 0);
+	input_set_abs_params(input_dev, ABS_Y, 0, SCREEN_MAX_Y, pdata->fuzzy, 0);
+	input_set_abs_params(input_dev, ABS_PRESSURE, 0, PRESS_MAX, pdata->fuzzz, 0);
 #endif
 
 	if (pdata->init_platform_hw)
