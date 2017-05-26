@@ -299,6 +299,7 @@ static inline void mx6q_topeet_init_uart(void)
 
 static int mx6q_topeet_fec_phy_init(struct phy_device *phydev)
 {
+#if 0
 	unsigned short val;
 
 	/* Ar8031 phy SmartEEE feature cause link status generates glitch,
@@ -332,7 +333,7 @@ static int mx6q_topeet_fec_phy_init(struct phy_device *phydev)
 
 	if (val & BMCR_PDOWN)
 		phy_write(phydev, 0x0, (val & ~BMCR_PDOWN));
-
+#endif
 	return 0;
 }
 
