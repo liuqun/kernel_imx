@@ -399,7 +399,7 @@ static void tsc2007_work(struct work_struct *work)
 		y = (tc.y * 80)/48;
 #endif	
 		TSC2007_DEBUG("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);
-		printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
+		//printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
 #if GTP_ICS_SLOT_REPORT
 		//input_mt_slot(input, 0);
 		//input_report_abs(input, ABS_MT_TRACKING_ID, 0);
