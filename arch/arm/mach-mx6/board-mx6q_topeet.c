@@ -386,10 +386,31 @@ static struct spi_board_info imx6_topeet_spi_nor_device[] __initdata = {
 #endif
 };
 
+/* add by cym 20170723 */
+#if defined(CONFIG_SPI_RC522) || defined(CONFIG_SPI_RC522_MODULE)
+static struct spi_board_info rc522_plat_board[] __initdata = {
+        [0] = {
+        .modalias        = "rc522",
+        .max_speed_hz = 20000000,//20000000,//4000000, /*4MHZ*/
+        .bus_num         = 0,
+        //.controller_data = &spi2_info,
+        .chip_select     = 0,
+    },
+};
+#endif
+/* end add */
+
 static void spi_device_init(void)
 {
         spi_register_board_info(imx6_topeet_spi_nor_device,
                                 ARRAY_SIZE(imx6_topeet_spi_nor_device));
+
+	/* add by cym 20170723 */
+#if defined(CONFIG_SPI_RC522) || defined(CONFIG_SPI_RC522_MODULE)
+	spi_register_board_info(rc522_plat_board,
+                                ARRAY_SIZE(rc522_plat_board));
+#endif
+	/* end add */
 }
 
 static struct imx_ssi_platform_data mx6_topeet_ssi_pdata = {

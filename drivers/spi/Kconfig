@@ -466,6 +466,14 @@ config SPI_TLE62X0
 	  sysfs interface, with each line presented as a kind of GPIO
 	  exposing both switch control and diagnostic feedback.
 
+#add by cym 20170723 for RC522 RFID Module
+config SPI_RC522
+        tristate "RC522 Module driver support"
+        depends on EXPERIMENTAL
+        help
+          This supports RC522 Module drivers.
+#end add
+
 #
 # Add new SPI protocol masters in alphabetical order above this line
 #
