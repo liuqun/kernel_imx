@@ -51,6 +51,13 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_KEY_ROW0__ECSPI1_MOSI,
 	MX6Q_PAD_KEY_COL1__ECSPI1_MISO,
 	MX6Q_PAD_KEY_ROW1__GPIO_4_9,
+
+	/* ECSPI2 */
+	MX6Q_PAD_EIM_CS0__ECSPI2_SCLK,
+	MX6Q_PAD_EIM_CS1__ECSPI2_MOSI,
+	MX6Q_PAD_EIM_OE__ECSPI2_MISO,
+	MX6Q_PAD_EIM_LBA__GPIO_2_27,
+
 	/* ENET */
 	MX6Q_PAD_ENET_MDIO__ENET_MDIO,
 	MX6Q_PAD_ENET_MDC__ENET_MDC,
@@ -87,7 +94,7 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_EIM_A17__GPIO_2_21,	/* J12 - Boot Mode Select */
 	MX6Q_PAD_EIM_A16__GPIO_2_22,	/* J12 - Boot Mode Select */
 	MX6Q_PAD_EIM_RW__GPIO_2_26,	/* J12 - Boot Mode Select */
-	MX6Q_PAD_EIM_LBA__GPIO_2_27,	/* J12 - Boot Mode Select */
+	//MX6Q_PAD_EIM_LBA__GPIO_2_27,	/* J12 - Boot Mode Select */	//remove by cym 20170809
 	MX6Q_PAD_EIM_EB0__GPIO_2_28,	/* J12 - Boot Mode Select */
 	MX6Q_PAD_EIM_EB1__GPIO_2_29,	/* J12 - Boot Mode Select */
 	MX6Q_PAD_EIM_EB3__GPIO_2_31,	/* J12 - Boot Mode Select */
@@ -258,7 +265,7 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_EIM_DA14__GPIO_3_14, /* FLT_2_B */
 
 	MX6Q_PAD_ENET_RXD0__GPIO_1_27, /* UOK_B */
-	MX6Q_PAD_EIM_CS1__GPIO_2_24,   /* DOK_B */
+	//MX6Q_PAD_EIM_CS1__GPIO_2_24,   /* DOK_B */	//remove by cym 20170809
 
 	/* Audio Codec */
 	MX6Q_PAD_KEY_COL2__GPIO_4_10,		/* CODEC_PWR_EN */
@@ -269,7 +276,7 @@ static iomux_v3_cfg_t mx6q_topeet_pads[] = {
 	MX6Q_PAD_NANDF_WP_B__GPIO_6_9,
 
 	/* PCIE */
-	MX6Q_PAD_EIM_D19__GPIO_3_19, /* PCIE_PWR_EN */
+	MX6Q_PAD_EIM_D17__GPIO_3_17,	//MX6Q_PAD_EIM_D19__GPIO_3_19, /* PCIE_PWR_EN */	//modify by cym 20170808
 
 	MX6Q_PAD_GPIO_17__GPIO_7_12, /* PCIE_RST */
 	MX6Q_PAD_KEY_COL4__GPIO_4_14, /* PCIE_DIS */

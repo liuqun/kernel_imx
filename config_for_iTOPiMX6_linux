@@ -1793,7 +1793,7 @@ CONFIG_SPI_IMX=y
 #
 # CONFIG_SPI_SPIDEV is not set
 # CONFIG_SPI_TLE62X0 is not set
-# CONFIG_SPI_RC522 is not set
+CONFIG_SPI_RC522=y
 
 #
 # PPS support

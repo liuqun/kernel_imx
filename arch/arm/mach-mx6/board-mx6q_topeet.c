@@ -128,7 +128,7 @@
 #define TOPEET_BAR0_INT	IMX_GPIO_NR(3, 15)
 #define TOPEET_eCOMPASS_INT	IMX_GPIO_NR(3, 16)
 #define TOPEET_GPS_PPS		IMX_GPIO_NR(3, 18)
-#define TOPEET_PCIE_PWR_EN	IMX_GPIO_NR(3, 19)
+#define TOPEET_PCIE_PWR_EN	IMX_GPIO_NR(3, 17)
 #define TOPEET_USB_OTG_PWR	IMX_GPIO_NR(3, 22)
 #define TOPEET_USB_H1_PWR	IMX_GPIO_NR(1, 29)
 #define TOPEET_CHARGE_CHG_1_B	IMX_GPIO_NR(3, 2)//cym IMX_GPIO_NR(3, 23)
@@ -142,6 +142,10 @@
 #define TOPEET_CODEC_PWR_EN	IMX_GPIO_NR(4, 10)
 #define TOPEET_HDMI_CEC_IN	IMX_GPIO_NR(4, 11)
 #define TOPEET_PCIE_DIS_B	IMX_GPIO_NR(4, 14)
+
+/* add by cym 20170809 */
+#define TOPEET_ECSPI2_CS0  IMX_GPIO_NR(2, 27)
+/* end add */
 
 #define TOPEET_DI0_D0_CS	IMX_GPIO_NR(5, 0)
 #define TOPEET_CHARGE_FLT_1_B	IMX_GPIO_NR(5, 2)
@@ -352,6 +356,17 @@ static const struct spi_imx_master mx6q_topeet_spi_data __initconst = {
         .num_chipselect = ARRAY_SIZE(mx6q_topeet_spi_cs),
 };
 
+/* add by cym 20170809 */
+static int mx6q_topeet_spi2_cs[] = {
+        TOPEET_ECSPI2_CS0,
+};
+
+static const struct spi_imx_master mx6q_topeet_spi2_data __initconst = {
+        .chipselect     = mx6q_topeet_spi2_cs,
+        .num_chipselect = ARRAY_SIZE(mx6q_topeet_spi2_cs),
+};
+/* end add */
+
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 static struct mtd_partition imx6_topeet_spi_nor_partitions[] = {
 	{
@@ -391,8 +406,8 @@ static struct spi_board_info imx6_topeet_spi_nor_device[] __initdata = {
 static struct spi_board_info rc522_plat_board[] __initdata = {
         [0] = {
         .modalias        = "rc522",
-        .max_speed_hz = 20000000,//20000000,//4000000, /*4MHZ*/
-        .bus_num         = 0,
+        .max_speed_hz = 10000000,//20000000,//4000000, /*4MHZ*/
+        .bus_num         = 1,//0,
         //.controller_data = &spi2_info,
         .chip_select     = 0,
     },
@@ -2535,6 +2550,9 @@ static void __init mx6_topeet_board_init(void)
 
 	/* SPI */
         imx6q_add_ecspi(0, &mx6q_topeet_spi_data);
+	/* add by cym 20170809 */
+	imx6q_add_ecspi(1, &mx6q_topeet_spi2_data);
+	/* end add */
 	spi_device_init();
 
 	imx6q_add_mxc_hdmi(&hdmi_data);

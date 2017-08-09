@@ -83,11 +83,9 @@ MODULE_PARM_DESC(bufsiz, "data bytes in biggest supported SPI message");
 void rc522_reset()
 {
 	//printk("************************ %s\n", __FUNCTION__);
-	if(gpio_request_one(RC522_RESET_PIN, GPIOF_OUT_INIT_HIGH, "RC522_RESET"))
+	if(gpio_request(RC522_RESET_PIN, "RC522_RESET"))
                 pr_err("failed to request GPK1_0 for RC522 reset control\n");
 
-        //s3c_gpio_setpull(RC522_RESET_PIN, S3C_GPIO_PULL_UP);
-        //gpio_set_value(RC522_RESET_PIN, 0);
 	gpio_direction_output(RC522_RESET_PIN, 0);
 
         mdelay(5);
