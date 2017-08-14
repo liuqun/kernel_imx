@@ -213,7 +213,7 @@ static iomux_v3_cfg_t mx6dl_topeet_pads[] = {
         //MX6DL_PAD_EIM_D30__USBOH3_USBH1_OC,
 
 	//add by cym 20170807 for MT6620
-        MX6Q_PAD_EIM_D30__GPIO_3_30,
+        MX6DL_PAD_EIM_D30__GPIO_3_30,
 
 	/* USDHC2 */
 	MX6DL_PAD_SD2_CLK__USDHC2_CLK,
