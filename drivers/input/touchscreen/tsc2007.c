@@ -45,8 +45,8 @@
 #define GTP_ICS_SLOT_REPORT   1
 #endif
 
-#define SCREEN_MAX_X    272	//480
-#define SCREEN_MAX_Y    480	//800
+#define SCREEN_MAX_X    480	//480
+#define SCREEN_MAX_Y    272	//800
 #define PRESS_MAX       255
 #define CFG_MAX_TOUCH_POINTS  1
 
@@ -131,7 +131,7 @@ static struct proc_dir_entry *ts_proc_entry;
 
 //13695 63 -1806708 72 -9270 32799468 65536
 //signed long pointercal[7] = {13662, -2, -1835668, 104, -9256, 32765962, 65536};
-signed long pointercal[7] = {-8317, 14, 33618640, -2, -4904, 18777894, 65536};
+signed long pointercal[7] = {-8248, -136, 32682332, 141, -4933, 18197492, 65536};
 
 static int ts_proc_write(struct file *file, const char *buffer,
 			     unsigned long count, void *data)
@@ -218,6 +218,7 @@ static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 
 	/* add by cym 20130417 */
 //#if GTP_ICS_SLOT_REPORT
+#ifdef CONFIG_ANDROID
 	a = pointercal[0];
 	b = pointercal[1];
 	c = pointercal[2];
@@ -228,6 +229,7 @@ static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 
 	tc->x = (a*tc->x + b*tc->y + c)/div;
 	tc->y = (d*tc->x + e*tc->y + f)/div;
+#endif
 //#endif
 	/* end add */
 	//printk("x:%d, y:%d\n", tc->x, tc->y);
@@ -395,8 +397,8 @@ static void tsc2007_work(struct work_struct *work)
 #endif
 		/* end modify */
 #else
-		x = (tc.x * 48)/80;
-		y = (tc.y * 80)/48;
+		x = tc.x;
+                y = tc.y;
 #endif	
 		TSC2007_DEBUG("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);
 		//printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
