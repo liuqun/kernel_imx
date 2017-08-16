@@ -40,14 +40,10 @@
 
 #define TSC2007_DEBUG_ON	0
 
-//#ifdef CONFIG_STAGING	//for Android
-#ifdef CONFIG_ANDROID
-#define GTP_ICS_SLOT_REPORT   1
-#endif
-
-#define SCREEN_MAX_X    480	//480
-#define SCREEN_MAX_Y    272	//800
+#define SCREEN_MAX_X    480
+#define SCREEN_MAX_Y    272
 #define PRESS_MAX       255
+
 #define CFG_MAX_TOUCH_POINTS  1
 
 #define TSC2007_DEBUG(fmt,arg...)          do{\
@@ -55,7 +51,7 @@
                                          printk("TSC2007-DEBUG[%d]"fmt,__LINE__, ##arg);\
                                        }while(0)
 
-#if GTP_ICS_SLOT_REPORT
+#ifdef CONFIG_ANDROID
 #include <linux/input/mt.h>
 #endif
 /* end add */
@@ -124,6 +120,7 @@ struct tsc2007 {
 
 /* add by cym 20141202 */
 int flags = 0;
+int process_flags = 0;
 /* end add */
 
 /* add by cym 20130417 */
@@ -217,20 +214,19 @@ static void tsc2007_read_values(struct tsc2007 *tsc, struct ts_event *tc)
 	tc->z2 = tsc2007_xfer(tsc, READ_Z2);
 
 	/* add by cym 20130417 */
-//#if GTP_ICS_SLOT_REPORT
-#ifdef CONFIG_ANDROID
-	a = pointercal[0];
-	b = pointercal[1];
-	c = pointercal[2];
-	d = pointercal[3];
-	e = pointercal[4];
-	f = pointercal[5];
-	div = pointercal[6];
+	if(process_flags)
+	{
+		a = pointercal[0];
+		b = pointercal[1];
+		c = pointercal[2];
+		d = pointercal[3];
+		e = pointercal[4];
+		f = pointercal[5];
+		div = pointercal[6];
 
-	tc->x = (a*tc->x + b*tc->y + c)/div;
-	tc->y = (d*tc->x + e*tc->y + f)/div;
-#endif
-//#endif
+		tc->x = (a*tc->x + b*tc->y + c)/div;
+		tc->y = (d*tc->x + e*tc->y + f)/div;
+	}
 	/* end add */
 	//printk("x:%d, y:%d\n", tc->x, tc->y);
 	/* Prepare for next touch reading - power down ADC, enable PENIRQ */
@@ -264,7 +260,7 @@ static void tsc2007_send_up_event(struct tsc2007 *tsc)
 	dev_dbg(&tsc->client->dev, "UP\n");
 	TSC2007_DEBUG("UP\n");
 
-#if GTP_ICS_SLOT_REPORT
+#ifdef CONFIG_ANDROID
 	input_mt_slot(input, 0);
     	input_report_abs(input, ABS_MT_TRACKING_ID, -1);
 #else
@@ -402,7 +398,7 @@ static void tsc2007_work(struct work_struct *work)
 #endif	
 		TSC2007_DEBUG("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);
 		//printk("%s: x:%d, y:%d, pre:%d\n", __FUNCTION__, x, y, rt);;
-#if GTP_ICS_SLOT_REPORT
+#ifdef CONFIG_ANDROID
 		//input_mt_slot(input, 0);
 		//input_report_abs(input, ABS_MT_TRACKING_ID, 0);
     		input_report_abs(input, ABS_MT_POSITION_X, x);
@@ -564,7 +560,7 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 	input_dev->phys = ts->phys;
 	input_dev->id.bustype = BUS_I2C;
 
-#if GTP_ICS_SLOT_REPORT
+#ifdef CONFIG_ANDROID
 	input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
 	input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
 
@@ -634,6 +630,12 @@ static int __devinit tsc2007_probe(struct i2c_client *client,
 #endif
 	/* end add */
 
+	/* add by cym 20170816*/
+#ifdef CONFIG_ANDROID
+	process_flags = 1;
+#endif
+	/* end add */
+
 	return 0;
 
  err_free_irq:
@@ -692,6 +694,18 @@ static void __exit tsc2007_exit(void)
 //module_init(tsc2007_init);
 late_initcall(tsc2007_init);
 module_exit(tsc2007_exit);
+
+/* add by cym 20170818 */
+#if 1
+static int __init get_bootsystem(char *str)
+{
+        if (strstr(str, "ubuntu")) {
+                process_flags = 1;
+        }
+}
+early_param("bootsystem", get_bootsystem);
+#endif
+/* end add */
 
 MODULE_AUTHOR("Kwangwoo Lee <kwlee@mtekvision.com>");
 MODULE_DESCRIPTION("TSC2007 TouchScreen Driver");
