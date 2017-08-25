@@ -173,8 +173,24 @@ static int sdio_bus_remove(struct device *dev)
 	/* Make sure card is powered before invoking ->remove() */
 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD) {
 		ret = pm_runtime_get_sync(dev);
+		/* modify by cym 20170825 */
+#if 0
 		if (ret < 0)
 			goto out;
+#else
+#define WIFI_SDIO_NAME	"mtk_sdio_client"
+
+		if(strncmp(dev->driver->name, WIFI_SDIO_NAME, strlen(WIFI_SDIO_NAME)))
+		{
+			if (ret < 0)
+				goto out;
+		}
+		else
+		{
+			printk("remove device driver:%s\n", dev->driver->name);
+		}
+#endif
+		/* end modify */
 	}
 
 	drv->remove(func);
