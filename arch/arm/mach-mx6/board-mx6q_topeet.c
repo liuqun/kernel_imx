@@ -1052,19 +1052,23 @@ static int __init set_touch_screen(char *options)
 {
 	if(strstr(options, "LDB-XGA"))	//9.7
 	{
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
 		ft5x0x_pdata1.screen_max_x   = 768;
 		ft5x0x_pdata1.screen_max_y   = 1024;
 
 		ft5x0x_pdata2.screen_max_x   = 768;
 		ft5x0x_pdata2.screen_max_y   = 1024;
+#endif
 	}
 	else if(strstr(options, "LDB-7inch")) //7.0
 	{
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
 		ft5x0x_pdata1.screen_max_x   = 800;
                 ft5x0x_pdata1.screen_max_y   = 1280;
 
                 ft5x0x_pdata2.screen_max_x   = 800;
                 ft5x0x_pdata2.screen_max_y   = 1280;
+#endif
 	}
 }
 
@@ -1160,6 +1164,12 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
                 I2C_BOARD_INFO("ft5x0x_ts", 0x70>>1),
                 .irq = gpio_to_irq(IMX_GPIO_NR(6, 7)),
                 .platform_data = &ft5x0x_pdata2,
+        },
+#endif
+
+#ifdef CONFIG_TOUCHSCREEN_GT9XX
+	{
+                I2C_BOARD_INFO("Goodix-TS", 0x5d),
         },
 #endif
 
@@ -2512,7 +2522,12 @@ static void __init mx6_topeet_board_init(void)
 		mxc_i2c0_board_info[0].platform_data = &wm8962_config_data;
 #endif
 	}
+
+/* remove by cym 20170927 */
+#if 0
 	imx6q_add_device_gpio_leds();
+#endif
+/* end remove */
 
         imx6q_add_imx_i2c(0, &mx6q_topeet_i2c_data);
         imx6q_add_imx_i2c(1, &mx6q_topeet_i2c_data);
@@ -2605,6 +2620,8 @@ static void __init mx6_topeet_board_init(void)
         gpio_direction_output(TOPEET_CABC_EN0, 0);
         gpio_request(TOPEET_CABC_EN1, "cabc-en1");
         gpio_direction_output(TOPEET_CABC_EN1, 0);
+	gpio_free(TOPEET_CABC_EN0);
+	gpio_free(TOPEET_CABC_EN1);
 
 #ifdef CONFIG_HAVE_EPIT
 	imx6q_add_mxc_epit(0);

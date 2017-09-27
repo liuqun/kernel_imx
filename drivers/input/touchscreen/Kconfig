@@ -808,4 +808,13 @@ config TOUCHSCREEN_FT5X0X
           To compile this driver as a module, choose M here: the
           module will be called FT5X0X.
 
+config TOUCHSCREEN_GT9XX
+        tristate "gt9xx multi-touchscreen panel support"
+        depends on I2C
+        help
+          Say Y here to enable support for I2C connected gt9xx
+           multiple touch panels.
+
+          To compile this driver as a module, choose M here: the
+          module will be called egala_ts.
 endif
