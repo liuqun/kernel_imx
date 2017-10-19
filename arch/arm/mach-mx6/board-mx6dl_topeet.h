@@ -214,7 +214,7 @@ static iomux_v3_cfg_t mx6dl_topeet_pads[] = {
 
 	//add by cym 20170807 for MT6620
         MX6DL_PAD_EIM_D30__GPIO_3_30,
-	MX6Q_PAD_EIM_D21__GPIO_3_21,
+	MX6DL_PAD_EIM_D21__GPIO_3_21,
 
 	/* USDHC2 */
 	MX6DL_PAD_SD2_CLK__USDHC2_CLK,
@@ -278,7 +278,7 @@ static iomux_v3_cfg_t mx6dl_topeet_pads[] = {
         MX6DL_PAD_NANDF_WP_B__GPIO_6_9,
 
 	/* PCIE */
-        MX6DL_PAD_EIM_D19__GPIO_3_19, /* PCIE_PWR_EN */
+        MX6DL_PAD_EIM_D17__GPIO_3_17,	//MX6DL_PAD_EIM_D19__GPIO_3_19, /* PCIE_PWR_EN */
 
 	MX6DL_PAD_GPIO_17__GPIO_7_12, /* PCIE_RST */
         MX6DL_PAD_KEY_COL4__GPIO_4_14, /* PCIE_DIS */
