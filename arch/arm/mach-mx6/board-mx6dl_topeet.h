@@ -30,7 +30,13 @@ static iomux_v3_cfg_t mx6dl_topeet_pads[] = {
 	/* CAN1  */
         MX6DL_PAD_KEY_ROW2__HDMI_TX_CEC_LINE,
         /* MX6DL_PAD_KEY_COL2__CAN1_TXCAN, */
+	/* modify by cym 20171121 */
+#if 0
         MX6DL_PAD_GPIO_1__WDOG2_WDOG_B,          /*WDOG_B to reset pmic*/
+#else
+        MX6DL_PAD_GPIO_1__GPIO_1_1,
+#endif
+        /* end modify */
         MX6DL_PAD_GPIO_2__GPIO_1_2,              /* user defined red led */
 /* modify by cym 20160817 */
 #if 0

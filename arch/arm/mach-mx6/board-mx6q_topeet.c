@@ -2403,6 +2403,19 @@ static int itop6x_max485_ctl_init(void)
         platform_device_register(&max485_plat_device);
 }
 #endif
+
+#ifdef CONFIG_RELAY_CTL
+struct platform_device relay_plat_device = {
+        .name   = "relay_ctl",
+        .id             = -1,
+};
+
+static int itop6x_relay_init(void)
+{
+        printk("plat: add device relay\n");
+        platform_device_register(&relay_plat_device);
+}
+#endif
 /* end add */
 
 /*!
@@ -2762,6 +2775,10 @@ static void __init mx6_topeet_board_init(void)
 
 #if defined(CONFIG_MAX485_CTL)
 	itop6x_max485_ctl_init();
+#endif
+
+#ifdef CONFIG_RELAY_CTL
+	itop6x_relay_init();
 #endif
 /* end add */
 

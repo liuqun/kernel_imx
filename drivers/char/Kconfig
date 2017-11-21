@@ -687,6 +687,12 @@ config MAX485_CTL
         default y
         help
           Enable MAX485 config
+
+config RELAY_CTL
+        bool "Enable RELAY config"
+        default n
+        help
+          Enable RELAY config
 #end add
 
 endmenu
