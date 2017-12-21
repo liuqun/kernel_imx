@@ -24,6 +24,17 @@
 #endif
 #include "power.h"
 
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+#include <linux/fs.h>
+#include <linux/uaccess.h>
+
+static int wifi_flags = 0;
+
+struct workqueue_struct *wifi_work_queue;
+#endif
+/* end add */
+
 enum {
 	DEBUG_EXIT_SUSPEND = 1U << 0,
 	DEBUG_WAKEUP = 1U << 1,
@@ -54,6 +65,45 @@ static struct wake_lock suspend_backoff_lock;
 #define SUSPEND_BACKOFF_INTERVAL	10000
 
 static unsigned suspend_short_count;
+
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+void wifi_ctrl(int type)
+{
+        struct file *fp;
+        mm_segment_t fs;
+        loff_t pos = 0;
+
+        fp = filp_open("/dev/wmtWifi", O_RDWR | O_CREAT, 0644);
+        if (IS_ERR(fp)) {
+                printk("create file error\n");
+                return -1;
+        }
+
+        fs = get_fs();
+
+        set_fs(KERNEL_DS);
+
+        pos = 0;
+        if(1 == type)
+        {
+                vfs_write(fp, "1", 1, &pos);
+
+		wifi_flags = 0;
+        }
+        else if(0 == type)
+        {
+                vfs_write(fp, "0", 1, &pos);
+
+		wifi_flags = 1;
+        }
+
+        filp_close(fp, NULL);
+
+        set_fs(fs);
+}
+#endif
+/* end add */
 
 #ifdef CONFIG_WAKELOCK_STAT
 static struct wake_lock deleted_wake_locks;
@@ -268,6 +318,19 @@ static void suspend_backoff(void)
 			  msecs_to_jiffies(SUSPEND_BACKOFF_INTERVAL));
 }
 
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+static void wifi_work(struct work_struct *work)
+{
+	if(1 == wifi_flags)
+	{
+		wifi_ctrl(1);
+	}
+}
+static DECLARE_WORK(wifiwork, wifi_work);
+#endif
+/* end add */
+
 static void suspend(struct work_struct *work)
 {
 	int ret;
@@ -279,6 +342,12 @@ static void suspend(struct work_struct *work)
 			pr_info("suspend: abort suspend\n");
 		return;
 	}
+
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+	wifi_ctrl(0);
+#endif
+/* end add */
 
 	entry_event_num = current_event_num;
 	sys_sync();
@@ -484,6 +553,16 @@ static void wake_lock_internal(
 				queue_work(suspend_work_queue, &suspend_work);
 		}
 	}
+
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+	if(!strcmp("PowerManagerService.Display", lock->name))
+	{
+		queue_work(wifi_work_queue, &wifiwork);
+	}
+#endif
+/* end add */
+
 	spin_unlock_irqrestore(&list_lock, irqflags);
 }
 
@@ -594,6 +673,17 @@ static int __init wakelocks_init(void)
 		goto err_suspend_work_queue;
 	}
 
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+	wifi_work_queue = create_singlethread_workqueue("wifi_work");
+	if (wifi_work_queue == NULL) {
+		destroy_workqueue(suspend_work_queue);
+                ret = -ENOMEM;
+                goto err_suspend_work_queue;
+        }
+#endif
+/* end add */
+
 #ifdef CONFIG_WAKELOCK_STAT
 	proc_create("wakelocks", S_IRUGO, NULL, &wakelock_stats_fops);
 #endif
@@ -619,6 +709,11 @@ static void  __exit wakelocks_exit(void)
 #ifdef CONFIG_WAKELOCK_STAT
 	remove_proc_entry("wakelocks", NULL);
 #endif
+/* add by cym 20171221 for wifi suspend */
+#ifdef CONFIG_MTK_COMBO_MT66XX
+	destroy_workqueue(wifi_work_queue);
+#endif
+/* end add */
 	destroy_workqueue(suspend_work_queue);
 	platform_driver_unregister(&power_driver);
 	platform_device_unregister(&power_device);
