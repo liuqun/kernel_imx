@@ -51,6 +51,12 @@ int TOUCH_MAX_Y = 768;
 
 int type = 0;
 
+unsigned int TP_IOCTL1 = IMX_GPIO_NR(6, 15);//NANDF_CS2 CABC_EN0
+unsigned int TP_IOCTL2 = IMX_GPIO_NR(6, 16);//NANDF_CS3 CABC_EN1
+
+unsigned int SABRESD_CAP_TCH_INT0 = IMX_GPIO_NR(6, 8);
+unsigned int SABRESD_CAP_TCH_INT1 = IMX_GPIO_NR(6, 7);
+
 static int swap_xy = 0;
 static int scal_xy = 0;
 
@@ -638,11 +644,13 @@ static int __init ft5x0x_ts_init(void)
 	//type = 0;
 
 #if 1
+#if 0
         #define TP_IOCTL1       IMX_GPIO_NR(6, 15)//NANDF_CS2 CABC_EN0
         #define TP_IOCTL2	IMX_GPIO_NR(6, 16)//NANDF_CS3 CABC_EN1
 
         #define SABRESD_CAP_TCH_INT0    IMX_GPIO_NR(6, 8)
         #define SABRESD_CAP_TCH_INT1    IMX_GPIO_NR(6, 7)
+#endif
 
         printk("==%s: reset==\n", __FUNCTION__);
 
@@ -736,6 +744,14 @@ static int __init ft5x0x_ts_init(void)
 	{
 		;
 	}
+	else if(0x03 == type)
+	{
+		TOUCH_MAX_X = 1024;
+                TOUCH_MAX_Y = 600;
+
+                touch_size = 0;//0;
+                scal_xy = 0;
+	}
 
 	if(1 == touch_size)
 	{
@@ -780,6 +796,14 @@ static int __init setup_width_height(char *str)
 
 		type = 1;
         }
+	else if(strstr(str, "VGA_1024600")) //1024x600
+	{
+		TP_IOCTL2 = IMX_GPIO_NR(2, 28);//EIM_EB0
+
+		SABRESD_CAP_TCH_INT1 = IMX_GPIO_NR(3, 9);
+
+		type = 3;
+	}
 
         //printk("%s\n", __FUNCTION__);
 }

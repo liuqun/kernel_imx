@@ -1047,34 +1047,6 @@ static struct ft5x0x_i2c_platform_data ft5x0x_pdata2 = {
 };
 #endif
 
-/* add by cym 20161012 */
-static int __init set_touch_screen(char *options)
-{
-	if(strstr(options, "LDB-XGA"))	//9.7
-	{
-#ifdef CONFIG_TOUCHSCREEN_FT5X0X
-		ft5x0x_pdata1.screen_max_x   = 768;
-		ft5x0x_pdata1.screen_max_y   = 1024;
-
-		ft5x0x_pdata2.screen_max_x   = 768;
-		ft5x0x_pdata2.screen_max_y   = 1024;
-#endif
-	}
-	else if(strstr(options, "LDB-7inch")) //7.0
-	{
-#ifdef CONFIG_TOUCHSCREEN_FT5X0X
-		ft5x0x_pdata1.screen_max_x   = 800;
-                ft5x0x_pdata1.screen_max_y   = 1280;
-
-                ft5x0x_pdata2.screen_max_x   = 800;
-                ft5x0x_pdata2.screen_max_y   = 1280;
-#endif
-	}
-}
-
-early_param("video", set_touch_screen);
-/* end add */
-
 static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("wm89**", 0x1a),
@@ -1167,12 +1139,6 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
         },
 #endif
 
-#ifdef CONFIG_TOUCHSCREEN_GT9XX
-	{
-                I2C_BOARD_INFO("Goodix-TS", 0x5d),
-        },
-#endif
-
 /* add by cym 20161018 */
 #ifdef CONFIG_TOUCHSCREEN_TSC2007
 	{
@@ -1183,7 +1149,54 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 #endif
 /* end add */
 
+#ifdef CONFIG_TOUCHSCREEN_GT9XX
+        {
+                I2C_BOARD_INFO("Goodix-TS", 0x5d),
+        },
+#endif
 };
+
+/* add by cym 20161012 */
+static int __init set_touch_screen(char *options)
+{
+        if(strstr(options, "LDB-XGA"))  //9.7
+        {
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+                ft5x0x_pdata1.screen_max_x   = 768;
+                ft5x0x_pdata1.screen_max_y   = 1024;
+
+                ft5x0x_pdata2.screen_max_x   = 768;
+                ft5x0x_pdata2.screen_max_y   = 1024;
+#endif
+        }
+        else if(strstr(options, "LDB-7inch")) //7.0
+        {
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+                ft5x0x_pdata1.screen_max_x   = 800;
+                ft5x0x_pdata1.screen_max_y   = 1280;
+
+                ft5x0x_pdata2.screen_max_x   = 800;
+                ft5x0x_pdata2.screen_max_y   = 1280;
+#endif
+        }
+        else if(strstr(options, "VGA_1024600")) //1024x600
+        {
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+                ft5x0x_pdata2.screen_max_x   = 1024;
+                ft5x0x_pdata2.screen_max_y   = 600;
+		ft5x0x_pdata2.gpio_irq = IMX_GPIO_NR(3, 9);
+
+                mxc_i2c2_board_info[2].irq = gpio_to_irq(IMX_GPIO_NR(3, 9));
+
+#ifdef CONFIG_TOUCHSCREEN_TSC2007
+                mxc_i2c2_board_info[3].irq = NULL;
+#endif
+#endif
+        }
+}
+
+early_param("video", set_touch_screen);
+/* end add */
 
 static int epdc_get_pins(void)
 {
