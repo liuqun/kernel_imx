@@ -744,7 +744,7 @@ static int __init ft5x0x_ts_init(void)
 	{
 		;
 	}
-	else if(0x03 == type)
+	else if(0x03 == type)	//1024x600
 	{
 		TOUCH_MAX_X = 1024;
                 TOUCH_MAX_Y = 600;
@@ -752,6 +752,14 @@ static int __init ft5x0x_ts_init(void)
                 touch_size = 0;//0;
                 scal_xy = 0;
 	}
+	else if(0x04 == type)   //1024x600
+        {
+                TOUCH_MAX_X = 800;
+                TOUCH_MAX_Y = 480;
+
+                touch_size = 0;
+                scal_xy = 0;
+        }
 
 	if(1 == touch_size)
 	{
@@ -804,6 +812,14 @@ static int __init setup_width_height(char *str)
 
 		type = 3;
 	}
+	else if(strstr(str, "VGA_800480")) //1024x600
+        {
+                TP_IOCTL2 = IMX_GPIO_NR(2, 28);//EIM_EB0
+
+                SABRESD_CAP_TCH_INT1 = IMX_GPIO_NR(3, 9);
+
+                type = 4;
+        }
 
         //printk("%s\n", __FUNCTION__);
 }

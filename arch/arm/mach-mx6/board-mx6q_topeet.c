@@ -1193,6 +1193,20 @@ static int __init set_touch_screen(char *options)
 #endif
 #endif
         }
+	else if(strstr(options, "VGA_800480")) //1024x600
+        {
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+                ft5x0x_pdata2.screen_max_x   = 800;
+                ft5x0x_pdata2.screen_max_y   = 480;
+                ft5x0x_pdata2.gpio_irq = IMX_GPIO_NR(3, 9);
+
+                mxc_i2c2_board_info[2].irq = gpio_to_irq(IMX_GPIO_NR(3, 9));
+
+#ifdef CONFIG_TOUCHSCREEN_TSC2007
+                mxc_i2c2_board_info[3].irq = NULL;
+#endif
+#endif
+        }
 }
 
 early_param("video", set_touch_screen);
